@@ -26,8 +26,12 @@ const DragItem = ({ id, text, onDragStart, onClick, isDisabled = false }: DragIt
     disabled: isDisabled,
   });
 
-  const style = {
+  const style = transform ? {
     transform: CSS.Translate.toString(transform),
+    touchAction: 'none',
+    zIndex: isDragging ? 9999 : 'auto',
+  } : {
+    touchAction: 'none',
   };
 
   useEffect(() => {
@@ -46,7 +50,7 @@ const DragItem = ({ id, text, onDragStart, onClick, isDisabled = false }: DragIt
       {...attributes}
       whileHover={!isDisabled ? { scale: 1.05 } : {}}
       whileTap={!isDisabled ? { scale: 0.95 } : {}}
-      className={`drag-item ${isDragging ? 'opacity-50' : 'opacity-100'} ${isDisabled ? 'bg-gray-400 cursor-not-allowed' : ''}`}
+      className={`drag-item ${isDragging ? 'opacity-70 shadow-lg' : 'opacity-100'} ${isDisabled ? 'bg-gray-400 cursor-not-allowed' : ''}`}
       onClick={!isDisabled ? onClick : undefined}
     >
       {text}

@@ -22,15 +22,41 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: theme('colors.background');
+  touch-action: manipulation; /* Evita o zoom em duplo toque em dispositivos móveis */
+  -webkit-tap-highlight-color: transparent; /* Remove o highlight de toque em elementos iOS */
+}
+
+/* Evitar seleção de texto durante o arraste */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Permitir seleção de texto em elementos específicos */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 @layer components {
   .drag-item {
     @apply bg-secondary text-white font-bold py-2 px-4 rounded-xl shadow-md cursor-grab text-2xl font-fredoka transition-all hover:scale-105 active:scale-95;
+    touch-action: none; /* Importante para drag & drop em dispositivos móveis */
+    -webkit-touch-callout: none; /* Evita o menu de contexto ao tocar e segurar */
+    min-height: 60px; /* Tamanho mínimo para melhor toque em dispositivos móveis */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .drop-zone {
     @apply bg-white border-3 border-dashed border-primary rounded-xl p-3 min-h-[60px] flex items-center justify-center text-2xl font-fredoka;
+    min-height: 60px; /* Tamanho mínimo para melhor alvo em dispositivos móveis */
+    min-width: 60px;
   }
 
   .drop-zone-active {
@@ -43,10 +69,12 @@ body {
 
   .btn {
     @apply bg-primary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:bg-opacity-90 transition-all text-xl font-fredoka;
+    min-height: 44px; /* Tamanho mínimo para botões em dispositivos móveis */
   }
 
   .btn-outline {
     @apply bg-white text-gray-700 font-bold py-3 px-6 rounded-xl shadow-sm hover:bg-gray-50 transition-all text-xl font-fredoka;
+    min-height: 44px;
   }
 
   .container-game {
@@ -94,6 +122,23 @@ body {
   /* Aplicar as interações do grupo separadamente */
   .group:hover .tooltip-text {
     @apply visible opacity-100;
+  }
+}
+
+/* Ajustes responsivos para telas pequenas */
+@media (max-width: 640px) {
+  .drag-item {
+    @apply text-xl py-1 px-3;
+    min-height: 50px;
+  }
+
+  .drop-zone {
+    @apply text-xl;
+    min-height: 50px;
+  }
+
+  .container-game {
+    @apply p-1;
   }
 }
 

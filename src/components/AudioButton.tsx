@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface AudioButtonProps {
   text: string;
@@ -7,6 +7,7 @@ interface AudioButtonProps {
   autoPlay?: boolean;
   className?: string;
   children?: React.ReactNode;
+  speechRate?: number;
 }
 
 /**
@@ -16,9 +17,18 @@ interface AudioButtonProps {
  * @param autoPlay - Se o áudio deve ser reproduzido automaticamente
  * @param className - Classes CSS adicionais
  * @param children - Conteúdo a ser renderizado dentro do botão
+ * @param speechRate - Velocidade da fala (1.0 é normal, maior é mais rápido)
  */
-const AudioButton = ({ text, onPlay, autoPlay = false, className = '', children }: AudioButtonProps) => {
+const AudioButton = ({ 
+  text, 
+  onPlay, 
+  autoPlay = false, 
+  className = '', 
+  children,
+  speechRate = 0.9
+}: AudioButtonProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const hasPlayedRef = useRef(false);
 
   const speakText = () => {
     if (isPlaying) return;
@@ -28,7 +38,7 @@ const AudioButton = ({ text, onPlay, autoPlay = false, className = '', children 
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
-    utterance.rate = 0.9; // Velocidade um pouco mais lenta para crianças
+    utterance.rate = speechRate;
     utterance.pitch = 1.2; // Tom um pouco mais alto (infantil)
     
     utterance.onend = () => {
@@ -39,10 +49,19 @@ const AudioButton = ({ text, onPlay, autoPlay = false, className = '', children 
   };
 
   useEffect(() => {
-    if (autoPlay) {
+    // Evitar reprodução automática em nova renderização do mesmo componente
+    if (autoPlay && !hasPlayedRef.current) {
+      hasPlayedRef.current = true;
       speakText();
     }
-  }, [autoPlay]);
+    
+    return () => {
+      // Limpar qualquer reprodução pendente ao desmontar
+      if (isPlaying) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [autoPlay, text]);
 
   return (
     <motion.button

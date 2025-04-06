@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Corpo do dinossauro -->
+  <path d="M30,70 Q40,60 50,70 Q60,80 70,70 L75,60 Q80,50 70,45 L80,40 Q75,30 65,35 L60,30 Q50,25 45,35 L30,30 Q25,35 30,40 L20,45 Q15,55 25,60 Z" fill="#228B22" />
+  
+  <!-- Olho -->
+  <circle cx="65" cy="40" r="3" fill="white" />
+  <circle cx="65" cy="40" r="1" fill="black" />
+  
+  <!-- Patas -->
+  <rect x="35" y="70" width="5" height="10" fill="#228B22" />
+  <rect x="60" y="70" width="5" height="10" fill="#228B22" />
+  
+  <!-- Dorso serrilhado -->
+  <path d="M45,35 L48,30 L51,35 L54,30 L57,35 L60,30 L63,35" fill="none" stroke="#228B22" stroke-width="2" />
+</svg> 

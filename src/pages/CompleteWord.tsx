@@ -7,6 +7,7 @@ import AudioButton from '../components/AudioButton';
 import PositiveFeedback from '../components/PositiveFeedback';
 import NegativeFeedback from '../components/NegativeFeedback';
 import RewardPopup from '../components/RewardPopup';
+import ImageWithFallback from '../components/ImageWithFallback';
 import { playSyllable } from '../utils/speech';
 import { useGameContext } from '../contexts/GameContext';
 import { getSyllablesForWord, getDropZonesForWord } from '../utils/gameData';
@@ -65,10 +66,11 @@ const WordImage = memo(({ imageUrl, word, onAudioPlay }: {
     className="flex justify-center items-start"
   >
     <div className="bg-white p-3 rounded-xl shadow-md">
-      <img 
+      <ImageWithFallback 
         src={imageUrl} 
         alt={word} 
         className="w-48 h-48 object-cover rounded-lg"
+        keyword={word}
       />
       <AudioButton 
         text={word} 
@@ -106,13 +108,13 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 8, // distância mínima para iniciar o arraste
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 250,
-        tolerance: 8,
+        delay: 200, // reduzindo o delay para 200ms para resposta mais rápida
+        tolerance: 5, // menor tolerância para arrastar mais facilmente
       },
     })
   );
@@ -150,6 +152,25 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
     value: 0,
     message: ''
   });
+
+  // Determinar layout com base no tamanho da tela
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Verificar se o dispositivo é mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Verificar inicialmente
+    checkMobile();
+    
+    // Adicionar listener para mudanças de tamanho da tela
+    window.addEventListener('resize', checkMobile);
+    
+    // Remover listener ao desmontar o componente
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Inicializar os estados com a palavra atual quando ela muda
   useEffect(() => {
@@ -390,8 +411,8 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
         <p className="text-sm text-gray-700 font-comic">{currentMode.instructions}</p>
       </motion.div>
 
-      {/* Conteúdo principal em grid */}
-      <div className="grid grid-cols-2 gap-2 flex-grow">
+      {/* Conteúdo principal em grid - responsivo para mobile */}
+      <div className={`${isMobile ? 'flex flex-col' : 'grid grid-cols-2'} gap-2 flex-grow`}>
         {/* Imagem da palavra - agora usa o componente memoizado */}
         <WordImage 
           imageUrl={currentWord.imageUrl} 
@@ -402,9 +423,16 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
         {/* Área de jogo */}
         <div className="flex flex-col items-center justify-center bg-white p-4 rounded-xl shadow-md">
           {/* Palavra a ser completada */}
-          <div className="text-center mb-4">
+          <div className="text-center mb-4 w-full">
             <h2 className="font-fredoka text-xl text-gray-700">Complete a palavra:</h2>
-            <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+            <DndContext 
+              sensors={sensors} 
+              onDragEnd={handleDragEnd}
+              // Estas propriedades adicionais ajudam no comportamento móvel
+              autoScroll={{
+                threshold: {x: 0, y: 0.2}, // Inicia o scroll quando próximo às bordas
+              }}
+            >
               <div className={`mt-2 grid gap-2 ${getGridColumns()}`}>
                 {dropZones.map((zone, index) => (
                   <DropZone
@@ -418,10 +446,10 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
                 ))}
               </div>
 
-              {/* Sílabas disponíveis */}
-              <div className="mt-auto">
+              {/* Sílabas disponíveis - com mais espaço para toque */}
+              <div className="mt-auto w-full">
                 <h3 className="font-fredoka text-lg text-gray-700 mb-2">Sílabas:</h3>
-                <div className="flex flex-wrap justify-center gap-2">
+                <div className="flex flex-wrap justify-center gap-3">
                   {dragItems.map(item => !item.used && (
                     <DragItem
                       key={item.id}

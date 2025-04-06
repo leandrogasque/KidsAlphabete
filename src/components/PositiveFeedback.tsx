@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import AudioButton from './AudioButton';
 
 interface PositiveFeedbackProps {
   text?: string;
   onComplete?: () => void;
-  duration?: number; // Nova prop para controlar a duração
+  duration?: number;
+  speechRate?: number; // Nova prop para controlar a velocidade da fala
 }
 
 /**
@@ -13,13 +14,16 @@ interface PositiveFeedbackProps {
  * @param text - Texto personalizado para o feedback
  * @param onComplete - Função chamada quando a animação terminar
  * @param duration - Duração do feedback em ms (padrão: 2000ms)
+ * @param speechRate - Velocidade da fala (1.0 é normal, maior é mais rápido)
  */
 const PositiveFeedback = ({ 
   text = "Muito bem! Você completou a palavra corretamente!", 
   onComplete,
-  duration = 2000 // Reduzido de 4000ms para 2000ms
+  duration = 2000,
+  speechRate = 1.2 // Voz um pouco mais rápida no feedback positivo
 }: PositiveFeedbackProps) => {
   const [visible, setVisible] = useState(true);
+  const didPlayAudio = useRef(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -33,6 +37,11 @@ const PositiveFeedback = ({
     
     return () => clearTimeout(timer);
   }, [onComplete, duration]);
+
+  // Função para lidar com o início da reprodução do áudio
+  const handleAudioPlay = () => {
+    didPlayAudio.current = true;
+  };
 
   // Variantes para a animação de confete
   const confettiVariants = {
@@ -85,18 +94,24 @@ const PositiveFeedback = ({
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.5, opacity: 0 }}
-            transition={{ duration: 0.3 }} // Mais rápido, era 0.5
+            transition={{ duration: 0.3 }}
             className="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-md"
           >
             <motion.div
               animate={{ rotate: [0, 10, -10, 10, 0] }}
-              transition={{ duration: 0.8, repeat: 1 }} // Mais rápido, era 1s e repetia 2 vezes
+              transition={{ duration: 0.8, repeat: 1 }}
             >
               <span className="text-6xl mb-4 inline-block">⭐</span>
             </motion.div>
             <h2 className="text-4xl font-bold text-primary mb-4 font-fredoka">Muito bem!</h2>
             <p className="text-xl text-gray-700 mb-6 font-comic">{text}</p>
-            <AudioButton text={text} autoPlay={true} className="hidden" />
+            <AudioButton 
+              text={text} 
+              autoPlay={true} 
+              className="hidden" 
+              onPlay={handleAudioPlay}
+              speechRate={speechRate}
+            />
           </motion.div>
         </div>
       )}

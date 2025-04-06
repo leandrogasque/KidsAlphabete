@@ -129,7 +129,7 @@ export const wordsList: WordData[] = [
     id: "word13",
     word: "MACACO",
     syllables: ["MA", "CA", "CO"],
-    imageUrl: "https://images.pexels.com/photos/1137084/pexels-photo-1137084.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "/images/macaco.svg",
     distractors: ["BI", "CHO"],
     level: 1
   },
@@ -153,7 +153,7 @@ export const wordsList: WordData[] = [
     id: "word16",
     word: "PICOLÉ",
     syllables: ["PI", "CO", "LÉ"],
-    imageUrl: "https://images.pexels.com/photos/1028715/pexels-photo-1028715.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "/images/picole.svg",
     distractors: ["SO", "VE", "TE"],
     level: 1
   },
@@ -203,7 +203,7 @@ export const wordsList: WordData[] = [
     id: "word19",
     word: "CARROSSEL",
     syllables: ["CAR", "ROS", "SEL"],
-    imageUrl: "https://images.pexels.com/photos/69230/pexels-photo-69230.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "/images/carrossel.svg",
     distractors: ["PAR", "QUE", "DI", "VER", "SÃO"],
     level: 2
   },
@@ -253,7 +253,7 @@ export const wordsList: WordData[] = [
     id: "word10",
     word: "DINOSSAURO",
     syllables: ["DI", "NOS", "SAU", "RO"],
-    imageUrl: "https://images.pexels.com/photos/53974/pexels-photo-53974.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "/images/dinossauro.svg",
     distractors: ["A", "NI", "MAL", "PRÉ", "HIS", "TÓ", "RI", "CO"],
     level: 3
   },

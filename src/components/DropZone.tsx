@@ -34,6 +34,13 @@ const DropZone = ({ id, children, isActive, index }: DropZoneProps) => {
     return '';
   };
 
+  // Adicionar highlight quando a zona está sobre
+  const overStyle = isOver ? {
+    transform: 'scale(1.1)',
+    boxShadow: '0 0 8px rgba(255,230,109,0.7)',
+    zIndex: 10,
+  } : {};
+
   return (
     <motion.div
       ref={setNodeRef}
@@ -41,6 +48,7 @@ const DropZone = ({ id, children, isActive, index }: DropZoneProps) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: animationDelay }}
       className={`drop-zone ${getZoneClass()}`}
+      style={overStyle}
     >
       <AnimatePresence mode="wait">
         {isActive ? (
