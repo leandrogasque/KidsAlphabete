@@ -368,7 +368,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
             <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold font-fredoka">Palavras Aprendidas</h3>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
                   {playerProgress.completedWords.length} de {wordsList.length} palavras
                 </div>
               </div>
