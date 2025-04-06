@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getFallbackImage } from '../utils/imageFallback';
 
 interface ImageWithFallbackProps {
@@ -25,6 +25,13 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   // Estado para rastrear a URL atual e o nível de fallback
   const [currentSrc, setCurrentSrc] = useState(src);
   const [fallbackLevel, setFallbackLevel] = useState(0);
+  
+  // Resetar a URL e o nível de fallback quando a URL original mudar
+  useEffect(() => {
+    console.log('ImageWithFallback: Atualizando imagem', { novaSrc: src, antigaSrc: currentSrc });
+    setCurrentSrc(src);
+    setFallbackLevel(0);
+  }, [src]);
   
   // Função para lidar com erros de carregamento de imagem
   const handleImageError = () => {
