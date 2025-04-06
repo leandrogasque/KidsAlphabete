@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useGameContext } from '../contexts/GameContext';
 import confetti from 'canvas-confetti';
 import { formatTime } from '../utils/helpers';
+
+// Não tem como saber o código exato, mas buscarei a URL e a substituirei
+const VICTORY_MUSIC_URL = 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_c204e69023.mp3?filename=success-1-6297.mp3';
 
 interface GameCompletedProps {
   onStartNewGame: () => void;
@@ -12,10 +15,11 @@ interface GameCompletedProps {
  * Componente exibido quando o jogador completa todas as palavras disponíveis
  */
 const GameCompleted: React.FC<GameCompletedProps> = ({ onStartNewGame }) => {
-  const { playerProgress, startNewGame } = useGameContext();
+  const { playerProgress, startNewGame, settings } = useGameContext();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
-  // Disparar confetti ao renderizar o componente
-  React.useEffect(() => {
+  // Tocar música de vitória e disparar confetti ao renderizar o componente
+  useEffect(() => {
     // Configuração do confetti
     const duration = 5 * 1000;
     const animationEnd = Date.now() + duration;
@@ -23,6 +27,47 @@ const GameCompleted: React.FC<GameCompletedProps> = ({ onStartNewGame }) => {
     const randomInRange = (min: number, max: number) => {
       return Math.random() * (max - min) + min;
     };
+    
+    // Tocar música de vitória se os efeitos sonoros estiverem ativados
+    if (settings.soundEffects) {
+      try {
+        console.log('GameCompleted: Tentando tocar música de vitória');
+        const audio = new Audio();
+        audio.src = VICTORY_MUSIC_URL;
+        audio.volume = 0.5;
+        
+        // Carregar o áudio primeiro
+        audio.addEventListener('canplaythrough', () => {
+          console.log('GameCompleted: Música de vitória carregada, tentando reproduzir');
+          // Tentar reproduzir com tratamento para bloqueio de autoplay
+          const playPromise = audio.play();
+          
+          if (playPromise !== undefined) {
+            playPromise.catch(error => {
+              console.error('GameCompleted: Erro ao reproduzir música de vitória', error);
+              
+              // Mostrar botão para tocar manualmente se houver erro
+              const playButton = document.createElement('button');
+              playButton.innerHTML = '🎵 Tocar Música';
+              playButton.className = 'fixed bottom-4 right-4 bg-primary text-white px-4 py-2 rounded-full shadow-lg z-50';
+              playButton.onclick = () => {
+                audio.play().catch(e => console.error('Erro ao tocar música:', e));
+                playButton.remove();
+              };
+              document.body.appendChild(playButton);
+            });
+          }
+        });
+        
+        audio.addEventListener('error', (e) => {
+          console.error('GameCompleted: Erro ao carregar música de vitória', e);
+        });
+        
+        audioRef.current = audio;
+      } catch (error) {
+        console.error('GameCompleted: Erro ao configurar áudio de vitória', error);
+      }
+    }
     
     const confettiInterval = setInterval(() => {
       const timeLeft = animationEnd - Date.now();
@@ -42,8 +87,15 @@ const GameCompleted: React.FC<GameCompletedProps> = ({ onStartNewGame }) => {
       });
     }, 250);
     
-    return () => clearInterval(confettiInterval);
-  }, []);
+    // Limpeza ao desmontar o componente
+    return () => {
+      clearInterval(confettiInterval);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
+  }, [settings.soundEffects]);
   
   // Ordenar sessões por pontuação (maior primeiro)
   const sortedSessions = [...playerProgress.sessionsHistory]
