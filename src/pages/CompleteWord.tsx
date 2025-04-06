@@ -11,6 +11,7 @@ import ImageWithFallback from '../components/ImageWithFallback';
 import { playSyllable } from '../utils/speech';
 import { useGameContext } from '../contexts/GameContext';
 import { getSyllablesForWord, getDropZonesForWord } from '../utils/gameData';
+import GameCompleted from '../components/GameCompleted';
 
 // Tipo para os itens arrastáveis
 interface DragItemType {
@@ -95,7 +96,9 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
     completeWord, 
     currentLevel,
     playerProgress, 
-    currentMode 
+    currentMode,
+    isGameCompleted,
+    startNewGame
   } = useGameContext();
   
   console.log('CompleteWord: GameContext carregado', { 
@@ -370,8 +373,9 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
     setShowError(false);
   }, []);
 
-  // Se não houver palavra atual, exiba uma mensagem com botão para tentar novamente
-  if (!currentWord) {
+  // Verificar condições para mostrar tela de carregamento
+  // Se o jogo foi completado, não mostrar a tela de carregamento mesmo se currentWord for null
+  if (!currentWord && !isGameCompleted) {
     console.warn('CompleteWord: Renderizando estado de loading');
     return (
       <div className="container-game py-8 flex flex-col items-center justify-center h-screen">
@@ -390,7 +394,16 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
     );
   }
 
-  console.log('CompleteWord: Renderizando jogo com palavra', currentWord.word);
+  console.log('CompleteWord: Renderizando jogo com palavra', currentWord?.word || 'jogo completado');
+  
+  // Se o jogo foi completado, mostrar apenas a tela de congratulações
+  if (isGameCompleted) {
+    return (
+      <GameCompleted
+        onStartNewGame={startNewGame}
+      />
+    );
+  }
   
   return (
     <div className={`container-game py-2 h-screen overflow-hidden flex flex-col level-${currentLevel.id}`}>

@@ -15,6 +15,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@tanstack/react-query": "^4.36.1",
     "autoprefixer": "^10.4.16",
+    "canvas-confetti": "^1.9.3",
     "framer-motion": "^10.16.4",
     "postcss": "^8.4.31",
     "react": "^18.2.0",
@@ -24,6 +25,7 @@
     "tailwindcss": "^3.3.3"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

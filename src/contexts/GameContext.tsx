@@ -23,6 +23,16 @@ interface GameSettings {
   disabledWords: string[]; // IDs das palavras desabilitadas
 }
 
+// Interface para uma sessão de jogo completa
+interface GameSession {
+  id: string;
+  date: string;
+  score: number;
+  completedWords: string[];
+  timeElapsed: number; // em segundos
+  level: number;
+}
+
 // Interface para o estado de progresso do jogador
 interface PlayerProgress {
   currentLevel: number;
@@ -30,6 +40,8 @@ interface PlayerProgress {
   completedSentences: string[];
   score: number;
   streakCount: number;
+  sessionsHistory: GameSession[]; // Histórico de sessões completadas
+  currentSessionStartTime: number | null; // Timestamp de início da sessão atual
 }
 
 // Interface para o contexto do jogo
@@ -44,6 +56,7 @@ interface GameContextType {
   playerProgress: PlayerProgress;
   isLoading: boolean;
   settings: GameSettings;
+  isGameCompleted: boolean; // Novo estado para indicar se todas as palavras foram completadas
   
   // Funções
   startGame: (modeId: string, levelId: number) => void;
@@ -55,8 +68,10 @@ interface GameContextType {
   setGameMode: (modeId: string) => void;
   setGameLevel: (levelId: number) => void;
   updateSettings: (newSettings: Partial<GameSettings>) => void;
-  toggleWordEnabled: (wordId: string) => void; // Nova função para habilitar/desabilitar palavras
-  isWordEnabled: (wordId: string) => boolean; // Nova função para verificar se uma palavra está habilitada
+  toggleWordEnabled: (wordId: string) => void; 
+  isWordEnabled: (wordId: string) => boolean; 
+  completeGame: () => void; // Nova função para finalizar o jogo e registrar a sessão
+  startNewGame: () => void; // Nova função para iniciar um novo jogo e resetar o estado de conclusão
 }
 
 // Configurações iniciais padrão
@@ -81,10 +96,13 @@ const initialGameContext: GameContextType = {
     completedWords: [],
     completedSentences: [],
     score: 0,
-    streakCount: 0
+    streakCount: 0,
+    sessionsHistory: [],
+    currentSessionStartTime: null
   },
   isLoading: false,
   settings: defaultSettings,
+  isGameCompleted: false,
   
   startGame: () => {},
   nextWord: () => {},
@@ -96,7 +114,9 @@ const initialGameContext: GameContextType = {
   setGameLevel: () => {},
   updateSettings: () => {},
   toggleWordEnabled: () => {},
-  isWordEnabled: () => true
+  isWordEnabled: () => true,
+  completeGame: () => {},
+  startNewGame: () => {}
 };
 
 // Criar o contexto
@@ -124,10 +144,13 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     completedWords: [],
     completedSentences: [],
     score: 0,
-    streakCount: 0
+    streakCount: 0,
+    sessionsHistory: [],
+    currentSessionStartTime: null
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [settings, setSettings] = useState<GameSettings>(defaultSettings);
+  const [isGameCompleted, setIsGameCompleted] = useState<boolean>(false);
 
   // Carregar progresso e configurações salvos
   useEffect(() => {
@@ -170,6 +193,15 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const startGame = (modeId: string, levelId: number) => {
     console.log('GameContext: Iniciando jogo', { modeId, levelId });
     setIsLoading(true);
+    setIsGameCompleted(false);
+    
+    // Registrar o início da sessão atual se ainda não estiver definido
+    if (!playerProgress.currentSessionStartTime) {
+      setPlayerProgress(prev => ({
+        ...prev,
+        currentSessionStartTime: Date.now()
+      }));
+    }
     
     try {
       // Encontrar o modo e o nível atual
@@ -301,6 +333,35 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     setIsLoading(true);
     
     try {
+      // Obter todas as palavras disponíveis de todos os níveis, excluindo palavras desabilitadas
+      let allAvailableWords: WordData[] = [];
+      
+      // Obter palavras de todos os níveis
+      for (let i = 1; i <= 3; i++) {
+        const levelWords = getWordsByLevel(i, settings.disabledWords);
+        allAvailableWords = [...allAvailableWords, ...levelWords];
+      }
+      
+      // Verificar se completou todas as palavras disponíveis
+      const allWordsCompleted = allAvailableWords.every(word => 
+        playerProgress.completedWords.includes(word.id)
+      );
+      
+      console.log('GameContext: Verificando conclusão do jogo', { 
+        totalPalavras: allAvailableWords.length,
+        palavrasCompletadas: playerProgress.completedWords.length,
+        todasCompletadas: allWordsCompleted 
+      });
+      
+      // Se todas as palavras estão completadas, terminar o jogo
+      if (allWordsCompleted && allAvailableWords.length > 0) {
+        console.log('GameContext: Todas as palavras foram completadas! Chamando completeGame()');
+        completeGame();
+        setIsLoading(false);
+        return;
+      }
+      
+      // Continuar para a próxima palavra normalmente
       // Tentar obter palavras para o nível atual
       let availableWords = getWordsByLevel(currentLevel.id, settings.disabledWords);
       
@@ -431,7 +492,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
       completedWords: [],
       completedSentences: [],
       score: 0,
-      streakCount: 0
+      streakCount: 0,
+      sessionsHistory: [],
+      currentSessionStartTime: null
     });
     
     // Reiniciar o jogo com o primeiro nível
@@ -489,6 +552,53 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     return !settings.disabledWords.includes(wordId);
   };
 
+  // Função para finalizar o jogo e registrar a sessão
+  const completeGame = () => {
+    const now = Date.now();
+    const sessionStartTime = playerProgress.currentSessionStartTime || now;
+    const timeElapsed = Math.floor((now - sessionStartTime) / 1000); // Tempo em segundos
+    
+    // Criar uma nova sessão
+    const newSession: GameSession = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      score: playerProgress.score,
+      completedWords: [...playerProgress.completedWords],
+      timeElapsed: timeElapsed,
+      level: currentLevel.id
+    };
+    
+    // Adicionar a sessão ao histórico
+    setPlayerProgress(prev => ({
+      ...prev,
+      sessionsHistory: [...prev.sessionsHistory, newSession],
+      currentSessionStartTime: null // Resetar o tempo de início
+    }));
+    
+    // Marcar o jogo como completado
+    setIsGameCompleted(true);
+    console.log('GameContext: Jogo completado', newSession);
+  };
+
+  // Função para iniciar um novo jogo e resetar o estado de conclusão
+  const startNewGame = () => {
+    // Resetar o estado de conclusão
+    setIsGameCompleted(false);
+    
+    // Manter o histórico de sessões, mas resetar as palavras completadas e pontuação
+    setPlayerProgress(prev => ({
+      ...prev,
+      completedWords: [],
+      completedSentences: [],
+      score: 0,
+      streakCount: 0,
+      currentSessionStartTime: Date.now()
+    }));
+    
+    // Iniciar o jogo com o nível 1
+    startGame(currentMode.id, 1);
+  };
+
   // Valor do contexto
   const contextValue: GameContextType = {
     currentMode,
@@ -500,6 +610,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     playerProgress,
     isLoading,
     settings,
+    isGameCompleted,
     startGame,
     nextWord,
     nextSentence,
@@ -510,7 +621,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     setGameLevel,
     updateSettings,
     toggleWordEnabled,
-    isWordEnabled
+    isWordEnabled,
+    completeGame,
+    startNewGame
   };
 
   return (
