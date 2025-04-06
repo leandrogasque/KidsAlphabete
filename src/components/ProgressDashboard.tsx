@@ -16,7 +16,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
   onClose,
   isEmbedded = false
 }) => {
-  const { playerProgress, resetProgress } = useGameContext();
+  const { playerProgress, resetProgress, toggleWordEnabled, isWordEnabled } = useGameContext();
   const [activeTab, setActiveTab] = useState<'overview' | 'levels' | 'words' | 'sentences'>('overview');
 
   // Calcular porcentagem de palavras completadas
@@ -410,36 +410,53 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
     return (
       <div>
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-bold font-fredoka">Palavras Aprendidas</h3>
+          <h3 className="text-lg font-bold font-fredoka">Palavras do Jogo</h3>
           <div className="bg-white text-sm px-3 py-1 rounded-full shadow-sm">
             {completedCount} de {wordData.length} palavras
           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {wordData.map(word => (
-            <div 
-              key={word.id}
-              className={`p-4 rounded-lg border flex items-center ${word.completed ? 'border-green-300 bg-white shadow-sm' : 'border-gray-200 bg-white'}`}
-            >
-              <div className="w-12 h-12 rounded overflow-hidden bg-gray-100 mr-3 flex-shrink-0">
-                <img src={word.imageUrl} alt={word.word} className="w-full h-full object-cover" />
+          {wordData.map(word => {
+            const enabled = isWordEnabled(word.id);
+            
+            return (
+              <div 
+                key={word.id}
+                className={`p-4 rounded-lg border flex items-center ${
+                  !enabled ? 'border-gray-300 bg-gray-100' : 
+                  word.completed ? 'border-green-300 bg-white shadow-sm' : 'border-gray-200 bg-white'
+                }`}
+              >
+                <div className="w-12 h-12 rounded overflow-hidden bg-gray-100 mr-3 flex-shrink-0">
+                  <img src={word.imageUrl} alt={word.word} className={`w-full h-full object-cover ${!enabled ? 'opacity-50' : ''}`} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className={`font-bold truncate ${!enabled ? 'text-gray-500' : ''}`}>{word.word}</h4>
+                  <p className="text-xs text-gray-500">
+                    Nível {word.level} • {word.syllables.length} sílabas
+                  </p>
+                </div>
+                <div className="ml-2 flex-shrink-0 flex items-center space-x-2">
+                  {word.completed && (
+                    <span className="text-green-500 text-xl flex items-center justify-center w-8 h-8">✓</span>
+                  )}
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={enabled}
+                      onChange={() => toggleWordEnabled(word.id)}
+                      className="sr-only peer"
+                    />
+                    <div className={`relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer 
+                      ${enabled ? 'peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:bg-primary' : 'after:translate-x-0'}
+                      after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all`}
+                    ></div>
+                  </label>
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <h4 className="font-bold truncate">{word.word}</h4>
-                <p className="text-xs text-gray-500">
-                  Nível {word.level} • {word.syllables.length} sílabas
-                </p>
-              </div>
-              <div className="ml-2 flex-shrink-0">
-                {word.completed ? (
-                  <span className="text-green-500 text-xl flex items-center justify-center w-8 h-8">✓</span>
-                ) : (
-                  <span className="text-gray-300 text-xl flex items-center justify-center w-8 h-8">○</span>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );

@@ -323,9 +323,18 @@ export const wordsList: WordData[] = [
   }
 ];
 
-// Função para obter palavras por nível
-export const getWordsByLevel = (level: number): WordData[] => {
-  return wordsList.filter(word => word.level === level);
+/**
+ * Retorna as palavras disponíveis para o nível especificado
+ * @param levelId O ID do nível para filtrar as palavras
+ * @param disabledWords Array opcional com IDs de palavras desabilitadas
+ * @returns Array de palavras filtradas pelo nível
+ */
+export const getWordsByLevel = (levelId: number, disabledWords: string[] = []): WordData[] => {
+  // Filtrar pelo nível e remover palavras desabilitadas
+  return wordsList.filter(word => 
+    word.level === levelId && 
+    !disabledWords.includes(word.id)
+  );
 };
 
 // Função para obter palavra por ID

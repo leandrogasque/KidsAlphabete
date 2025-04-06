@@ -20,6 +20,7 @@ interface GameSettings {
   soundEffects: boolean;
   backgroundMusic: boolean;
   hapticFeedback: boolean;
+  disabledWords: string[]; // IDs das palavras desabilitadas
 }
 
 // Interface para o estado de progresso do jogador
@@ -54,6 +55,8 @@ interface GameContextType {
   setGameMode: (modeId: string) => void;
   setGameLevel: (levelId: number) => void;
   updateSettings: (newSettings: Partial<GameSettings>) => void;
+  toggleWordEnabled: (wordId: string) => void; // Nova função para habilitar/desabilitar palavras
+  isWordEnabled: (wordId: string) => boolean; // Nova função para verificar se uma palavra está habilitada
 }
 
 // Configurações iniciais padrão
@@ -61,7 +64,8 @@ const defaultSettings: GameSettings = {
   parentPin: '1234', // PIN padrão para acesso dos pais
   soundEffects: true,
   backgroundMusic: true,
-  hapticFeedback: true
+  hapticFeedback: true,
+  disabledWords: []
 };
 
 // Valores iniciais para o contexto
@@ -90,7 +94,9 @@ const initialGameContext: GameContextType = {
   resetProgress: () => {},
   setGameMode: () => {},
   setGameLevel: () => {},
-  updateSettings: () => {}
+  updateSettings: () => {},
+  toggleWordEnabled: () => {},
+  isWordEnabled: () => true
 };
 
 // Criar o contexto
@@ -160,9 +166,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     }
   }, [settings]);
 
-  // Função para iniciar o jogo
+  // Iniciar o jogo
   const startGame = (modeId: string, levelId: number) => {
     console.log('GameContext: Iniciando jogo', { modeId, levelId });
+    setIsLoading(true);
     
     try {
       // Encontrar o modo e o nível atual
@@ -173,6 +180,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
       
       if (!mode || !level) {
         console.error('GameContext: Modo ou nível não encontrado');
+        setIsLoading(false);
         return;
       }
 
@@ -190,17 +198,70 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
       
       if (modeId === 'complete-word') {
         try {
-          // Obter palavras para o nível atual
-          const levelWords = getWordsByLevel(levelId);
+          // Obter palavras para o nível atual, excluindo palavras desabilitadas
+          let levelWords = getWordsByLevel(levelId, settings.disabledWords);
           console.log('GameContext: Palavras obtidas para o nível', levelWords);
           
-          if (levelWords && levelWords.length > 0) {
+          // Se não houver palavras disponíveis neste nível após filtrar
+          if (!levelWords || levelWords.length === 0) {
+            console.warn(`GameContext: Nenhuma palavra disponível para o nível ${levelId} após filtrar desabilitadas`);
+            
+            // Verificar se há palavras habilitadas em qualquer nível
+            const allWords: WordData[] = [];
+            
+            // Verificar palavras em todos os níveis
+            for (let i = 1; i <= 3; i++) {
+              const words = getWordsByLevel(i);
+              allWords.push(...words);
+            }
+            
+            const anyLevelWords = allWords.filter(word => !settings.disabledWords.includes(word.id));
+            
+            if (anyLevelWords.length > 0) {
+              // Se houver palavras em outros níveis, usar o nível da primeira palavra disponível
+              const firstAvailableWord = anyLevelWords[0];
+              const newLevelId = firstAvailableWord.level;
+              const newLevel = getLevelDetails(newLevelId);
+              
+              if (newLevel) {
+                console.warn(`GameContext: Alterando para o nível ${newLevelId} que possui palavras disponíveis`);
+                setCurrentLevel(newLevel);
+                
+                // Filtrar palavras apenas do novo nível
+                const newLevelWords = anyLevelWords.filter(word => word.level === newLevelId);
+                setWordsList(newLevelWords);
+                
+                // Escolher uma palavra aleatória para começar
+                const randomIndex = Math.floor(Math.random() * newLevelWords.length);
+                setCurrentWord(newLevelWords[randomIndex]);
+              }
+            } else {
+              // Se não houver palavras disponíveis em nenhum nível, mostrar um alerta
+              console.error('GameContext: Todas as palavras estão desabilitadas!');
+              alert('Todas as palavras estão desabilitadas! Habilite pelo menos uma palavra na Área dos Pais.');
+              
+              // Reabilitar todas as palavras como medida de segurança
+              setSettings(prev => ({
+                ...prev,
+                disabledWords: []
+              }));
+              
+              // Tentar novamente com todas as palavras habilitadas
+              levelWords = getWordsByLevel(levelId);
+              setWordsList(levelWords);
+              
+              if (levelWords.length > 0) {
+                const randomIndex = Math.floor(Math.random() * levelWords.length);
+                setCurrentWord(levelWords[randomIndex]);
+              }
+            }
+          } else {
+            // Atualizar a lista de palavras para o nível atual
+            setWordsList(levelWords);
+            
             // Escolher uma palavra aleatória para começar
             const randomIndex = Math.floor(Math.random() * levelWords.length);
-            console.log('GameContext: Selecionando palavra inicial', { index: randomIndex, word: levelWords[randomIndex] });
             setCurrentWord(levelWords[randomIndex]);
-          } else {
-            console.error('GameContext: Nenhuma palavra encontrada para o nível', levelId);
           }
         } catch (error) {
           console.error('GameContext: Erro ao obter palavras', error);
@@ -228,6 +289,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
       console.log('GameContext: Jogo iniciado com sucesso!');
     } catch (error) {
       console.error('GameContext: Erro ao iniciar o jogo', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -235,76 +298,64 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const nextWord = () => {
     // Limpa a palavra atual primeiro para garantir que ela seja completamente removida
     setCurrentWord(null);
+    setIsLoading(true);
     
-    if (wordsList.length === 0) {
-      // Se não houver palavras disponíveis, recarrega o nível atual
-      const words = getWordsByLevel(currentLevel.id);
-      setWordsList(words);
+    try {
+      // Tentar obter palavras para o nível atual
+      let availableWords = getWordsByLevel(currentLevel.id, settings.disabledWords);
       
-      if (words.length > 0) {
-        setTimeout(() => {
-          const randomIndex = Math.floor(Math.random() * words.length);
-          setCurrentWord(words[randomIndex]);
-        }, 100); // Pequeno atraso para garantir que a UI seja atualizada
+      // Se não houver palavras disponíveis neste nível após filtrar
+      if (availableWords.length === 0) {
+        console.warn(`GameContext: Nenhuma palavra disponível para o nível ${currentLevel.id} após filtrar desabilitadas`);
+        
+        // Verificar se há palavras habilitadas em qualquer nível
+        const anyLevelWords = wordsList.filter(word => !settings.disabledWords.includes(word.id));
+        
+        if (anyLevelWords.length > 0) {
+          // Se houver palavras em outros níveis, usar uma dessas
+          console.log('GameContext: Usando palavras de outros níveis');
+          availableWords = anyLevelWords;
+        } else {
+          // Se não houver palavras disponíveis em nenhum nível, mostrar alerta
+          console.error('GameContext: Todas as palavras estão desabilitadas!');
+          alert('Todas as palavras estão desabilitadas! Habilite pelo menos uma palavra na Área dos Pais.');
+          
+          // Reabilitar todas as palavras como medida de segurança
+          setSettings(prev => ({
+            ...prev,
+            disabledWords: []
+          }));
+          
+          // Tentar novamente com todas as palavras habilitadas
+          availableWords = getWordsByLevel(currentLevel.id);
+        }
       }
-      return;
-    }
-    
-    // Filtrar palavras que ainda não foram completadas
-    const remainingWords = wordsList.filter(
-      word => !playerProgress.completedWords.includes(word.id)
-    );
-    
-    if (remainingWords.length > 0) {
-      // Selecionar uma palavra aleatória da lista filtrada
-      setTimeout(() => {
+      
+      // Atualizar a lista de palavras disponíveis
+      setWordsList(availableWords);
+      
+      // Filtrar palavras que ainda não foram completadas
+      const remainingWords = availableWords.filter(
+        word => !playerProgress.completedWords.includes(word.id)
+      );
+      
+      if (remainingWords.length > 0) {
+        // Selecionar uma palavra aleatória da lista filtrada
         const randomIndex = Math.floor(Math.random() * remainingWords.length);
         setCurrentWord(remainingWords[randomIndex]);
-      }, 100); // Pequeno atraso para garantir que a UI seja atualizada
-    } else {
-      // Se todas as palavras foram completadas, subir de nível
-      const nextLevelId = currentLevel.id + 1;
-      const nextLevel = getLevelDetails(nextLevelId);
-      
-      if (nextLevel) {
-        setCurrentLevel(nextLevel);
-        
-        // Atualizar o progresso do jogador
-        setPlayerProgress(prev => ({
-          ...prev,
-          currentLevel: nextLevelId,
-          completedWords: [] // Reset das palavras completadas para o novo nível
-        }));
-        
-        // Obter palavras para o próximo nível
-        const words = getWordsByLevel(nextLevelId);
-        setWordsList(words);
-        
-        // Selecionar a primeira palavra aleatoriamente
-        if (words.length > 0) {
-          setTimeout(() => {
-            const randomIndex = Math.floor(Math.random() * words.length);
-            setCurrentWord(words[randomIndex]);
-          }, 100); // Pequeno atraso para garantir que a UI seja atualizada
-        }
+      } else if (availableWords.length > 0) {
+        // Se todas as palavras foram completadas, mas ainda há palavras disponíveis
+        // Selecionar uma aleatória de todas as disponíveis
+        const randomIndex = Math.floor(Math.random() * availableWords.length);
+        setCurrentWord(availableWords[randomIndex]);
       } else {
-        // Se não houver próximo nível, reiniciar o nível atual
-        const words = getWordsByLevel(currentLevel.id);
-        setWordsList(words);
-        
-        // Resetar as palavras completadas e selecionar uma palavra aleatória
-        setPlayerProgress(prev => ({
-          ...prev,
-          completedWords: []
-        }));
-        
-        if (words.length > 0) {
-          setTimeout(() => {
-            const randomIndex = Math.floor(Math.random() * words.length);
-            setCurrentWord(words[randomIndex]);
-          }, 100); // Pequeno atraso para garantir que a UI seja atualizada
-        }
+        // Caso de segurança - não deveria acontecer devido aos checks acima
+        console.error('GameContext: Sem palavras disponíveis após todos os checks');
       }
+    } catch (error) {
+      console.error('GameContext: Erro ao carregar próxima palavra', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -384,7 +435,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     });
     
     // Reiniciar o jogo com o primeiro nível
-    startGame(currentMode.id, 1);
+    startGame('complete-word', 1);
   };
 
   // Mudar o modo de jogo
@@ -423,6 +474,21 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     }));
   };
 
+  // Função para habilitar/desabilitar uma palavra
+  const toggleWordEnabled = (wordId: string) => {
+    setSettings(prev => ({
+      ...prev,
+      disabledWords: prev.disabledWords.includes(wordId)
+        ? prev.disabledWords.filter(w => w !== wordId)
+        : [...prev.disabledWords, wordId]
+    }));
+  };
+
+  // Função para verificar se uma palavra está habilitada
+  const isWordEnabled = (wordId: string) => {
+    return !settings.disabledWords.includes(wordId);
+  };
+
   // Valor do contexto
   const contextValue: GameContextType = {
     currentMode,
@@ -442,7 +508,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     resetProgress,
     setGameMode,
     setGameLevel,
-    updateSettings
+    updateSettings,
+    toggleWordEnabled,
+    isWordEnabled
   };
 
   return (

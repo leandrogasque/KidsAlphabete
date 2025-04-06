@@ -180,7 +180,7 @@ const ParentsArea: React.FC<ParentsAreaProps> = ({ onClose }) => {
           </nav>
           
           {/* Conteúdo principal */}
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto bg-gray-50">
             {/* Seção de Progresso */}
             {activeSection === 'progress' && (
               <div className="h-full">
