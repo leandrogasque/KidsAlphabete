@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Fundo arredondado -->
+  <rect width="128" height="128" rx="24" fill="#FF6B6B" />
+  
+  <!-- Abelha amigável no lugar do círculo amarelo -->
+  <g transform="translate(96, 32)">
+    <!-- Corpo da abelha -->
+    <ellipse cx="0" cy="0" rx="12" ry="9" fill="#FFE66D" />
+    <ellipse cx="-2" cy="-1" rx="8" ry="6" fill="#333" opacity="0.2" />
+    
+    <!-- Listras -->
+    <rect x="-8" y="-3" width="16" height="2" fill="#333" rx="1" opacity="0.7" />
+    <rect x="-8" y="1" width="16" height="2" fill="#333" rx="1" opacity="0.7" />
+    
+    <!-- Asas -->
+    <ellipse cx="-4" cy="-6" rx="6" ry="4" fill="white" opacity="0.8" transform="rotate(-15)" />
+    <ellipse cx="4" cy="-6" rx="6" ry="4" fill="white" opacity="0.8" transform="rotate(15)" />
+    
+    <!-- Olhos -->
+    <circle cx="-4" cy="-2" r="1.5" fill="#333" />
+    <circle cx="4" cy="-2" r="1.5" fill="#333" />
+    
+    <!-- Sorriso -->
+    <path d="M-3,2 Q0,4 3,2" stroke="#333" stroke-width="1" fill="none" />
+    
+    <!-- Antenas -->
+    <path d="M-3,-4 Q-6,-8 -5,-10" stroke="#333" stroke-width="1" fill="none" />
+    <path d="M3,-4 Q6,-8 5,-10" stroke="#333" stroke-width="1" fill="none" />
+    <circle cx="-5" cy="-10" r="0.8" fill="#333" />
+    <circle cx="5" cy="-10" r="0.8" fill="#333" />
+  </g>
+  
+  <circle cx="24" cy="96" r="12" fill="#4ECDC4" />
+  
+  <!-- Letras gregas alfa e beta -->
+  <text x="64" y="80" font-family="Fredoka, sans-serif" font-size="64" font-weight="bold" text-anchor="middle" fill="white">αβ</text>
+  
+  <!-- Elementos decorativos educacionais -->
+  <path d="M32 24 L40 32 L32 40 L24 32 Z" fill="#FFE66D" />
+  <path d="M96 88 L104 96 L96 104 L88 96 Z" fill="#4ECDC4" />
+</svg>

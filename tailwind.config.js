@@ -16,6 +16,9 @@ export default {
         'fredoka': ['Fredoka', 'sans-serif'],
         'comic': ['Comic Neue', 'cursive'],
       },
+      borderWidth: {
+        '3': '3px',
+      },
     },
   },
   plugins: [],

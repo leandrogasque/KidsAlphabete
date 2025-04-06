@@ -29,17 +29,18 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background overflow-hidden">
       {!started ? (
-        <div className="container-game flex flex-col items-center justify-center min-h-screen">
+        <div className="container-game flex flex-col items-center justify-center min-h-screen py-2">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="text-center"
+            className="text-center w-full max-w-md px-2"
           >
-            <h1 className="text-6xl font-bold text-primary mb-6 font-fredoka">AlfaBeta</h1>
-            <p className="text-2xl mb-8 text-gray-700 font-comic">Aprendendo a ler de forma divertida!</p>
+            <img src="/logo.svg" alt="Logo AlfaBeta" className="w-32 h-32 mx-auto mb-2" />
+            <h1 className="text-5xl font-bold text-primary mb-4 font-fredoka">AlfaBeta</h1>
+            <p className="text-xl mb-6 text-gray-700 font-comic">Aprendendo a ler de forma divertida!</p>
             
             {!showLevelSelect ? (
               <div className="space-y-4">
@@ -71,48 +72,52 @@ function AppContent() {
                 </motion.button>
               </div>
             ) : (
-              <div className="bg-white p-6 rounded-xl shadow-md max-w-md">
-                <h2 className="text-2xl font-bold text-gray-700 mb-4 font-fredoka">Escolha o Modo:</h2>
-                <div className="grid grid-cols-1 gap-3 mb-6">
-                  {gameModes.map(mode => (
-                    <motion.button
-                      key={mode.id}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`btn-outline text-left p-3 rounded-lg border-2 ${
-                        currentMode.id === mode.id ? 'border-primary bg-primary/10' : 'border-gray-300'
-                      }`}
-                      onClick={() => setGameMode(mode.id)}
-                    >
-                      <p className="font-bold font-fredoka">{mode.name}</p>
-                      <p className="text-sm text-gray-600 font-comic">{mode.description}</p>
-                    </motion.button>
-                  ))}
+              <div className="bg-white p-2 rounded-xl shadow-md w-full mx-auto flex flex-col">
+                <div>
+                  <h2 className="text-base font-bold text-gray-700 mb-1 font-fredoka">Escolha o Modo:</h2>
+                  <div className="grid grid-cols-2 gap-1 mb-2">
+                    {gameModes.map(mode => (
+                      <motion.button
+                        key={mode.id}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`btn-outline text-left p-1.5 rounded-lg border ${
+                          currentMode.id === mode.id ? 'border-primary bg-primary/10' : 'border-gray-300'
+                        }`}
+                        onClick={() => setGameMode(mode.id)}
+                      >
+                        <p className="font-bold font-fredoka text-xs">{mode.name}</p>
+                        <p className="text-xs text-gray-600 font-comic truncate">{mode.description}</p>
+                      </motion.button>
+                    ))}
+                  </div>
                 </div>
                 
-                <h2 className="text-2xl font-bold text-gray-700 mb-4 font-fredoka">Escolha o Nível:</h2>
-                <div className="grid grid-cols-1 gap-3 mb-6">
-                  {levels.map(level => (
-                    <motion.button
-                      key={level.id}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`btn-outline text-left p-3 rounded-lg border-2 ${
-                        currentLevel.id === level.id ? 'border-primary bg-primary/10' : 'border-gray-300'
-                      }`}
-                      onClick={() => setGameLevel(level.id)}
-                    >
-                      <p className="font-bold font-fredoka">{level.name}</p>
-                      <p className="text-sm text-gray-600 font-comic">{level.description}</p>
-                    </motion.button>
-                  ))}
+                <div>
+                  <h2 className="text-base font-bold text-gray-700 mb-1 font-fredoka">Escolha o Nível:</h2>
+                  <div className="grid grid-cols-3 gap-1 mb-2">
+                    {levels.map(level => (
+                      <motion.button
+                        key={level.id}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`btn-outline text-left p-1.5 rounded-lg border ${
+                          currentLevel.id === level.id ? 'border-primary bg-primary/10' : 'border-gray-300'
+                        }`}
+                        onClick={() => setGameLevel(level.id)}
+                      >
+                        <p className="font-bold font-fredoka text-xs">{level.name}</p>
+                        <p className="text-xs text-gray-600 font-comic truncate">{level.description}</p>
+                      </motion.button>
+                    ))}
+                  </div>
                 </div>
                 
-                <div className="flex space-x-4">
+                <div className="flex space-x-2 mt-1">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="btn-outline text-primary border-primary border-2 flex-1 py-3"
+                    className="btn-outline text-primary border-primary border flex-1 py-1.5 text-sm"
                     onClick={() => setShowLevelSelect(false)}
                   >
                     Voltar
@@ -120,7 +125,7 @@ function AppContent() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="btn flex-1 py-3"
+                    className="btn flex-1 py-1.5 text-sm"
                     onClick={() => setShowTutorial(true)}
                   >
                     Jogar

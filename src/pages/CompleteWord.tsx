@@ -194,9 +194,9 @@ const CompleteWord: React.FC<CompleteWordProps> = ({ onShowProgress }) => {
   }
 
   return (
-    <div className={`container-game py-8 level-${currentLevel.id}`}>
+    <div className={`container-game py-2 h-screen overflow-hidden flex flex-col level-${currentLevel.id}`}>
       {/* Barra de status */}
-      <div className="flex justify-between items-center mb-4 bg-white p-3 rounded-lg shadow-sm">
+      <div className="flex justify-between items-center mb-2 bg-white p-2 rounded-lg shadow-sm">
         <div>
           <span className="font-fredoka text-gray-700">Nível: </span>
           <span className="font-bold text-primary">{currentLevel.name}</span>
@@ -217,86 +217,89 @@ const CompleteWord: React.FC<CompleteWordProps> = ({ onShowProgress }) => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8 text-center"
+        className="mb-2 text-center"
       >
-        <h1 className="text-4xl font-bold text-primary mb-2 font-fredoka">{currentMode.name}</h1>
-        <p className="text-xl text-gray-700 font-comic">{currentMode.instructions}</p>
+        <h1 className="text-2xl font-bold text-primary mb-1 font-fredoka">{currentMode.name}</h1>
+        <p className="text-sm text-gray-700 font-comic">{currentMode.instructions}</p>
       </motion.div>
 
-      {/* Imagem da palavra */}
-      <motion.div 
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="flex justify-center mb-8"
-      >
-        <div className="bg-white p-4 rounded-xl shadow-md">
-          <img 
-            src={currentWord.imageUrl} 
-            alt={currentWord.word} 
-            className="w-64 h-64 object-cover rounded-lg"
-          />
-          <AudioButton 
-            text={currentWord.word} 
-            className="mt-4 btn w-full"
-            autoPlay={false}
-          >
-            Ouvir Palavra
-          </AudioButton>
-        </div>
-      </motion.div>
-
-      {/* Área para soltar as sílabas */}
-      <div className="mb-12">
-        <motion.h2 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="text-2xl font-bold text-gray-700 mb-4 text-center font-fredoka"
+      {/* Conteúdo principal em grid */}
+      <div className="grid grid-cols-2 gap-2 flex-grow">
+        {/* Imagem da palavra */}
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex justify-center items-start"
         >
-          Forme a palavra:
-        </motion.h2>
-        <div className={`grid ${getGridColumns()} gap-4`}>
-          {dropZones.map((zone, index) => (
-            <DropZone 
-              key={zone.id} 
-              accept="syllable"
-              onDrop={(item) => handleDrop(zone.id, item)}
-              isActive={zone.text !== null}
-              index={index}
+          <div className="bg-white p-3 rounded-xl shadow-md">
+            <img 
+              src={currentWord.imageUrl} 
+              alt={currentWord.word} 
+              className="w-48 h-48 object-cover rounded-lg"
+            />
+            <AudioButton 
+              text={currentWord.word} 
+              className="mt-2 btn w-full py-2 text-base"
+              autoPlay={false}
             >
-              {zone.text ? (
-                <span className="text-3xl font-bold">{zone.text}</span>
-              ) : (
-                <span className="text-gray-400">?</span>
-              )}
-            </DropZone>
-          ))}
+              Ouvir Palavra
+            </AudioButton>
+          </div>
+        </motion.div>
+
+        {/* Área para soltar as sílabas */}
+        <div className="flex flex-col">
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-xl font-bold text-gray-700 mb-2 text-center font-fredoka"
+          >
+            Forme a palavra:
+          </motion.h2>
+          <div className={`grid ${getGridColumns()} gap-2 mb-2`}>
+            {dropZones.map((zone, index) => (
+              <DropZone 
+                key={zone.id} 
+                accept="syllable"
+                onDrop={(item) => handleDrop(zone.id, item)}
+                isActive={zone.text !== null}
+                index={index}
+              >
+                {zone.text ? (
+                  <span className="text-2xl font-bold">{zone.text}</span>
+                ) : (
+                  <span className="text-gray-400">?</span>
+                )}
+              </DropZone>
+            ))}
+          </div>
+          
+          {/* Sílabas disponíveis */}
+          <motion.div 
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="bg-white p-3 rounded-xl shadow-md mt-auto"
+          >
+            <h2 className="text-lg font-bold text-gray-700 mb-2 text-center font-fredoka">Sílabas:</h2>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {dragItems.map((item) => (
+                <DragItem
+                  key={item.id}
+                  id={item.id}
+                  text={item.text}
+                  type="syllable"
+                  isDisabled={item.used}
+                  onClick={() => handleItemClick(item.text)}
+                  onDragStart={() => playSyllable(item.text)}
+                />
+              ))}
+            </div>
+          </motion.div>
         </div>
       </div>
-
-      {/* Sílabas disponíveis */}
-      <motion.div 
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="bg-white p-6 rounded-xl shadow-md"
-      >
-        <h2 className="text-2xl font-bold text-gray-700 mb-4 text-center font-fredoka">Sílabas:</h2>
-        <div className="flex flex-wrap gap-4 justify-center">
-          {dragItems.map((item) => (
-            <DragItem
-              key={item.id}
-              id={item.id}
-              text={item.text}
-              type="syllable"
-              isDisabled={item.used}
-              onClick={() => handleItemClick(item.text)}
-              onDragStart={() => playSyllable(item.text)}
-            />
-          ))}
-        </div>
-      </motion.div>
 
       {/* Indicador de sequência (streak) */}
       {playerProgress.streakCount > 0 && (

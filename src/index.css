@@ -26,11 +26,11 @@ body {
 
 @layer components {
   .drag-item {
-    @apply bg-secondary text-white font-bold py-4 px-6 rounded-xl shadow-md cursor-grab text-3xl font-fredoka transition-all hover:scale-105 active:scale-95;
+    @apply bg-secondary text-white font-bold py-2 px-4 rounded-xl shadow-md cursor-grab text-2xl font-fredoka transition-all hover:scale-105 active:scale-95;
   }
 
   .drop-zone {
-    @apply bg-white border-4 border-dashed border-primary rounded-xl p-4 min-h-[80px] flex items-center justify-center text-3xl font-fredoka;
+    @apply bg-white border-3 border-dashed border-primary rounded-xl p-3 min-h-[60px] flex items-center justify-center text-2xl font-fredoka;
   }
 
   .drop-zone-active {
@@ -50,7 +50,7 @@ body {
   }
 
   .container-game {
-    @apply max-w-4xl mx-auto p-4;
+    @apply max-w-4xl mx-auto p-2 overflow-hidden;
   }
   
   .level-card {

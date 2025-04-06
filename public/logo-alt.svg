@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Fundo com formato mais suave -->
+  <rect width="128" height="128" rx="32" fill="#6A4C93" />
+  
+  <!-- Elementos decorativos em camadas -->
+  <circle cx="64" cy="64" r="48" fill="#FF6B6B" opacity="0.8" />
+  <circle cx="64" cy="64" r="36" fill="#FFE66D" opacity="0.8" />
+  
+  <!-- Letras gregas alfa e beta -->
+  <text x="64" y="80" font-family="Fredoka, sans-serif" font-size="64" font-weight="bold" text-anchor="middle" fill="white">αβ</text>
+  
+  <!-- Elementos educacionais -->
+  <circle cx="32" cy="32" r="8" fill="#4ECDC4" />
+  <circle cx="96" cy="32" r="8" fill="#4ECDC4" />
+  <circle cx="96" cy="96" r="8" fill="#4ECDC4" />
+  <circle cx="32" cy="96" r="8" fill="#4ECDC4" />
+</svg>
