@@ -1,0 +1,59 @@
+.drag-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #4a6bff;
+  color: white;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: grab;
+  user-select: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 60px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.drag-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.drag-item:active {
+  cursor: grabbing;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.drag-item.placed {
+  background-color: #d0d0d0;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.drag-item.placed:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .drag-item {
+    padding: 10px 16px;
+    font-size: 16px;
+    min-width: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .drag-item {
+    padding: 8px 12px;
+    font-size: 14px;
+    min-width: 40px;
+  }
+} 

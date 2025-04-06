@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameContext } from '../contexts/GameContext';
 import { levels, wordsList } from '../utils/gameData';
+import { sentencesList } from '../utils/sentenceData';
 
 interface ProgressDashboardProps {
   onClose: () => void;
@@ -12,18 +13,33 @@ interface ProgressDashboardProps {
  */
 const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
   const { playerProgress, resetProgress } = useGameContext();
-  const [activeTab, setActiveTab] = useState<'overview' | 'levels' | 'words'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'levels' | 'words' | 'sentences'>('overview');
 
   // Calcular porcentagem de palavras completadas
-  const calculateCompletion = () => {
+  const calculateWordCompletion = () => {
     const totalWords = wordsList.length;
     const completedWords = playerProgress.completedWords.length;
     return Math.round((completedWords / totalWords) * 100);
   };
 
+  // Calcular porcentagem de frases completadas
+  const calculateSentenceCompletion = () => {
+    const totalSentences = sentencesList.length;
+    const completedSentences = playerProgress.completedSentences.length;
+    return totalSentences > 0 ? Math.round((completedSentences / totalSentences) * 100) : 0;
+  };
+
+  // Calcular porcentagem geral de conclusão (palavras + frases)
+  const calculateOverallCompletion = () => {
+    const totalItems = wordsList.length + sentencesList.length;
+    const completedItems = playerProgress.completedWords.length + playerProgress.completedSentences.length;
+    return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+  };
+
   // Calcular estatísticas por nível
   const calculateLevelStats = () => {
     return levels.map(level => {
+      // Palavras
       const wordsInLevel = wordsList.filter(word => word.level === level.id);
       const completedWordsInLevel = playerProgress.completedWords.filter(
         wordId => wordsInLevel.some(w => w.id === wordId)
@@ -31,13 +47,34 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
       
       const totalWords = wordsInLevel.length;
       const completedWords = completedWordsInLevel.length;
-      const percentage = totalWords > 0 ? Math.round((completedWords / totalWords) * 100) : 0;
+      const wordPercentage = totalWords > 0 ? Math.round((completedWords / totalWords) * 100) : 0;
+      
+      // Frases
+      const sentencesInLevel = sentencesList.filter(sentence => sentence.level === level.id);
+      const completedSentencesInLevel = playerProgress.completedSentences.filter(
+        sentenceId => sentencesInLevel.some(s => s.id === sentenceId)
+      );
+      
+      const totalSentences = sentencesInLevel.length;
+      const completedSentences = completedSentencesInLevel.length;
+      const sentencePercentage = totalSentences > 0 ? Math.round((completedSentences / totalSentences) * 100) : 0;
+      
+      // Combinado
+      const totalItems = totalWords + totalSentences;
+      const completedItems = completedWords + completedSentences;
+      const overallPercentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
       
       return {
         level,
         totalWords,
         completedWords,
-        percentage,
+        wordPercentage,
+        totalSentences,
+        completedSentences,
+        sentencePercentage,
+        totalItems,
+        completedItems,
+        overallPercentage,
         isCurrentLevel: playerProgress.currentLevel === level.id
       };
     });
@@ -48,6 +85,14 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
     return wordsList.map(word => ({
       ...word,
       completed: playerProgress.completedWords.includes(word.id)
+    }));
+  };
+
+  // Obter lista completa de frases com status
+  const getSentencesList = () => {
+    return sentencesList.map(sentence => ({
+      ...sentence,
+      completed: playerProgress.completedSentences.includes(sentence.id)
     }));
   };
 
@@ -80,7 +125,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
         </div>
         
         {/* Navegação entre abas */}
-        <div className="flex border-b">
+        <div className="flex border-b overflow-x-auto">
           <button 
             className={`py-3 px-6 font-fredoka ${activeTab === 'overview' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'}`}
             onClick={() => setActiveTab('overview')}
@@ -98,6 +143,12 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
             onClick={() => setActiveTab('words')}
           >
             Palavras
+          </button>
+          <button 
+            className={`py-3 px-6 font-fredoka ${activeTab === 'sentences' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'}`}
+            onClick={() => setActiveTab('sentences')}
+          >
+            Frases
           </button>
         </div>
         
@@ -119,21 +170,49 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                     <h3 className="text-gray-500 text-sm mb-1">Nível Atual</h3>
                     <p className="font-bold">{levels.find(l => l.id === playerProgress.currentLevel)?.name}</p>
                   </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <h3 className="text-gray-500 text-sm mb-1">Palavras Completadas</h3>
                     <p className="font-bold">{playerProgress.completedWords.length} de {wordsList.length}</p>
+                    <div className="flex justify-between mb-1 mt-2">
+                      <span className="text-sm text-gray-500">Progresso</span>
+                      <span className="text-sm font-bold">{calculateWordCompletion()}%</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-bar-fill bg-secondary"
+                        style={{ width: `${calculateWordCompletion()}%` }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-gray-500 text-sm mb-1">Frases Completadas</h3>
+                    <p className="font-bold">{playerProgress.completedSentences.length} de {sentencesList.length}</p>
+                    <div className="flex justify-between mb-1 mt-2">
+                      <span className="text-sm text-gray-500">Progresso</span>
+                      <span className="text-sm font-bold">{calculateSentenceCompletion()}%</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-bar-fill"
+                        style={{ width: `${calculateSentenceCompletion()}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
                 
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-gray-500">Progresso Geral</span>
-                    <span className="text-sm font-bold">{calculateCompletion()}%</span>
+                    <span className="text-sm font-bold">{calculateOverallCompletion()}%</span>
                   </div>
                   <div className="progress-bar">
                     <div 
                       className="progress-bar-fill"
-                      style={{ width: `${calculateCompletion()}%` }}
+                      style={{ width: `${calculateOverallCompletion()}%` }}
                     />
                   </div>
                 </div>
@@ -143,14 +222,15 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                 <h3 className="text-lg font-bold mb-3 font-fredoka">Resumo de Desempenho</h3>
                 <p className="text-gray-700 mb-4">
                   A criança está no nível {playerProgress.currentLevel} ({levels.find(l => l.id === playerProgress.currentLevel)?.name}) 
-                  e completou {playerProgress.completedWords.length} palavras até o momento.
+                  e completou {playerProgress.completedWords.length} palavras e {playerProgress.completedSentences.length} frases até o momento.
                 </p>
                 
                 <h4 className="font-bold text-gray-700 mb-2">Recomendações:</h4>
                 <ul className="list-disc pl-5 text-gray-700">
-                  <li className="mb-1">Pratique palavras do nível atual regularmente</li>
-                  <li className="mb-1">Incentive a criança a ouvir as sílabas antes de arrastar</li>
-                  <li className="mb-1">Comemore cada palavra completada</li>
+                  <li className="mb-1">Pratique palavras e frases do nível atual regularmente</li>
+                  <li className="mb-1">Incentive a criança a ouvir as sílabas/palavras antes de arrastar</li>
+                  <li className="mb-1">Alterne entre os modos "Complete a Palavra" e "Forme a Frase"</li>
+                  <li className="mb-1">Comemore cada conquista</li>
                 </ul>
               </div>
               
@@ -171,7 +251,19 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
               <h3 className="text-lg font-bold mb-4 font-fredoka">Progresso por Nível</h3>
               
               <div className="grid gap-4">
-                {calculateLevelStats().map(({ level, totalWords, completedWords, percentage, isCurrentLevel }) => (
+                {calculateLevelStats().map(({
+                  level,
+                  totalWords,
+                  completedWords,
+                  wordPercentage,
+                  totalSentences,
+                  completedSentences,
+                  sentencePercentage,
+                  totalItems,
+                  completedItems,
+                  overallPercentage,
+                  isCurrentLevel
+                }) => (
                   <div 
                     key={level.id}
                     className={`p-4 rounded-lg border ${isCurrentLevel ? 'border-primary bg-primary/5' : ''}`}
@@ -186,22 +278,44 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                       )}
                     </div>
                     
-                    <div className="flex items-center mb-2">
-                      <div className="flex-1">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                      <div>
                         <div className="flex justify-between mb-1">
-                          <span className="text-sm text-gray-500">Progresso</span>
-                          <span className="text-sm font-bold">{percentage}%</span>
+                          <span className="text-sm text-gray-500">Palavras</span>
+                          <span className="text-sm font-bold">{wordPercentage}% ({completedWords}/{totalWords})</span>
+                        </div>
+                        <div className="progress-bar">
+                          <div 
+                            className="progress-bar-fill bg-secondary"
+                            style={{ width: `${wordPercentage}%` }}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sm text-gray-500">Frases</span>
+                          <span className="text-sm font-bold">{sentencePercentage}% ({completedSentences}/{totalSentences})</span>
                         </div>
                         <div className="progress-bar">
                           <div 
                             className="progress-bar-fill"
-                            style={{ width: `${percentage}%` }}
+                            style={{ width: `${sentencePercentage}%` }}
                           />
                         </div>
                       </div>
-                      <div className="ml-4 text-center">
-                        <span className="text-sm text-gray-500 block">Palavras</span>
-                        <span className="font-bold">{completedWords}/{totalWords}</span>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm text-gray-500">Progresso Geral</span>
+                        <span className="text-sm font-bold">{overallPercentage}% ({completedItems}/{totalItems})</span>
+                      </div>
+                      <div className="progress-bar">
+                        <div 
+                          className="progress-bar-fill"
+                          style={{ width: `${overallPercentage}%` }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -232,6 +346,39 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                     </div>
                     <div className="ml-auto">
                       {word.completed ? (
+                        <span className="text-green-500 text-xl">✓</span>
+                      ) : (
+                        <span className="text-gray-300 text-xl">○</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Frases */}
+          {activeTab === 'sentences' && (
+            <div>
+              <h3 className="text-lg font-bold mb-4 font-fredoka">Frases Aprendidas</h3>
+              
+              <div className="grid grid-cols-1 gap-3">
+                {getSentencesList().map(sentence => (
+                  <div 
+                    key={sentence.id}
+                    className={`p-3 rounded-lg border flex items-center ${sentence.completed ? 'border-green-300 bg-green-50' : 'border-gray-200'}`}
+                  >
+                    <div className="w-12 h-12 rounded overflow-hidden bg-gray-100 mr-3 flex-shrink-0">
+                      <img src={sentence.imageUrl} alt={sentence.words.join(' ')} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold">{sentence.words.join(' ')}</h4>
+                      <p className="text-xs text-gray-500">
+                        Nível {sentence.level} • {sentence.words.length} palavras
+                      </p>
+                    </div>
+                    <div className="ml-3">
+                      {sentence.completed ? (
                         <span className="text-green-500 text-xl">✓</span>
                       ) : (
                         <span className="text-gray-300 text-xl">○</span>

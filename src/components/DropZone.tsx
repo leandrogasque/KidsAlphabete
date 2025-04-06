@@ -2,7 +2,7 @@ import { useDrop } from 'react-dnd';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { ReactNode } from 'react';
 
-interface DropZoneProps {
+export interface DropZoneProps {
   accept: string;
   onDrop: (item: any) => void;
   children: ReactNode;
@@ -31,6 +31,8 @@ const DropZone = ({ accept, onDrop, children, isActive, index }: DropZoneProps) 
 
   // Atraso para animações baseado no índice
   const animationDelay = index * 0.1;
+
+  console.log(`Renderizando DropZone: ${index}, aceita: ${accept}, ativo: ${isActive}`);
 
   // Determinar a classe CSS com base no estado da zona
   const getZoneClass = () => {

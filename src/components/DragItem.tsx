@@ -2,7 +2,7 @@ import { useDrag } from 'react-dnd';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
 
-interface DragItemProps {
+export interface DragItemProps {
   id: string;
   text: string;
   type: string;
@@ -35,6 +35,8 @@ const DragItem = ({ id, text, type, onDragStart, onClick, isDisabled = false }: 
       onDragStart();
     }
   }, [isDragging, onDragStart]);
+
+  console.log(`Renderizando DragItem: ${id}, tipo: ${type}, texto: ${text}`);
 
   return (
     <motion.div

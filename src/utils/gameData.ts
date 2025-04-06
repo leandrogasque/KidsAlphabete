@@ -76,6 +76,7 @@ export const gameModes: GameMode[] = [
 
 // Banco de palavras
 export const wordsList: WordData[] = [
+  // Nível 1 - Iniciante
   {
     id: "word1",
     word: "BANANA",
@@ -109,6 +110,56 @@ export const wordsList: WordData[] = [
     level: 1
   },
   {
+    id: "word11",
+    word: "PATO",
+    syllables: ["PA", "TO"],
+    imageUrl: "https://images.pexels.com/photos/660266/pexels-photo-660266.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["GA", "LO"],
+    level: 1
+  },
+  {
+    id: "word12",
+    word: "SAPO",
+    syllables: ["SA", "PO"],
+    imageUrl: "https://images.pexels.com/photos/76957/tree-frog-frog-green-amphibian-76957.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["PE", "LO"],
+    level: 1
+  },
+  {
+    id: "word13",
+    word: "MACACO",
+    syllables: ["MA", "CA", "CO"],
+    imageUrl: "https://images.pexels.com/photos/1319515/pexels-photo-1319515.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["BI", "CHO"],
+    level: 1
+  },
+  {
+    id: "word14",
+    word: "LEITE",
+    syllables: ["LEI", "TE"],
+    imageUrl: "https://images.pexels.com/photos/2064129/pexels-photo-2064129.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["QUE", "JO"],
+    level: 1
+  },
+  {
+    id: "word15",
+    word: "TOMATE",
+    syllables: ["TO", "MA", "TE"],
+    imageUrl: "https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["SA", "LA", "DA"],
+    level: 1
+  },
+  {
+    id: "word16",
+    word: "PICOLÉ",
+    syllables: ["PI", "CO", "LÉ"],
+    imageUrl: "https://images.pexels.com/photos/1375807/pexels-photo-1375807.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["SO", "VE", "TE"],
+    level: 1
+  },
+  
+  // Nível 2 - Intermediário
+  {
     id: "word5",
     word: "CACHORRO",
     syllables: ["CA", "CHOR", "RO"],
@@ -133,6 +184,56 @@ export const wordsList: WordData[] = [
     level: 2
   },
   {
+    id: "word17",
+    word: "TELEFONE",
+    syllables: ["TE", "LE", "FO", "NE"],
+    imageUrl: "https://images.pexels.com/photos/163007/phone-old-year-built-1955-bakelite-163007.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["CE", "LU", "LAR", "DIS", "CAR"],
+    level: 2
+  },
+  {
+    id: "word18",
+    word: "BICICLETA",
+    syllables: ["BI", "CI", "CLE", "TA"],
+    imageUrl: "https://images.pexels.com/photos/276517/pexels-photo-276517.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["MO", "TO", "CI", "LE", "DA"],
+    level: 2
+  },
+  {
+    id: "word19",
+    word: "CARROSSEL",
+    syllables: ["CAR", "ROS", "SEL"],
+    imageUrl: "https://images.pexels.com/photos/2399097/pexels-photo-2399097.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["PAR", "QUE", "DI", "VER", "SÃO"],
+    level: 2
+  },
+  {
+    id: "word20",
+    word: "TARTARUGA",
+    syllables: ["TAR", "TA", "RU", "GA"],
+    imageUrl: "https://images.pexels.com/photos/847393/pexels-photo-847393.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["A", "NI", "MAL", "LEN", "TO"],
+    level: 2
+  },
+  {
+    id: "word21",
+    word: "MORANGO",
+    syllables: ["MO", "RAN", "GO"],
+    imageUrl: "https://images.pexels.com/photos/70746/strawberries-red-fruit-royalty-free-70746.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["FRU", "TA", "DO", "CE"],
+    level: 2
+  },
+  {
+    id: "word22",
+    word: "FOGUETE",
+    syllables: ["FO", "GUE", "TE"],
+    imageUrl: "https://images.pexels.com/photos/2159/flight-sky-earth-space.jpg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["A", "VI", "ÃO", "ES", "PA", "ÇO"],
+    level: 2
+  },
+  
+  // Nível 3 - Avançado
+  {
     id: "word8",
     word: "COMPUTADOR",
     syllables: ["COM", "PU", "TA", "DOR"],
@@ -154,6 +255,70 @@ export const wordsList: WordData[] = [
     syllables: ["DI", "NOS", "SAU", "RO"],
     imageUrl: "https://images.pexels.com/photos/67112/pexels-photo-67112.jpeg?auto=compress&cs=tinysrgb&w=600",
     distractors: ["A", "NI", "MAL", "PRÉ", "HIS", "TÓ", "RI", "CO"],
+    level: 3
+  },
+  {
+    id: "word23",
+    word: "HELICÓPTERO",
+    syllables: ["HE", "LI", "CÓP", "TE", "RO"],
+    imageUrl: "https://images.pexels.com/photos/87945/helicopter-transport-helicopter-military-87945.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["A", "VI", "ÃO", "VO", "AR", "PI", "LO", "TO"],
+    level: 3
+  },
+  {
+    id: "word24",
+    word: "BIBLIOTECA",
+    syllables: ["BI", "BLI", "O", "TE", "CA"],
+    imageUrl: "https://images.pexels.com/photos/1290141/pexels-photo-1290141.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["LI", "VRO", "ES", "TU", "DO", "LER", "SA", "LA"],
+    level: 3
+  },
+  {
+    id: "word25",
+    word: "BORBOLETA",
+    syllables: ["BOR", "BO", "LE", "TA"],
+    imageUrl: "https://images.pexels.com/photos/36485/blossom-bloom-butterfly-yellow.jpg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["IN", "SE", "TO", "VO", "AR", "CO", "LO", "RI", "DO"],
+    level: 3
+  },
+  {
+    id: "word26",
+    word: "ESPANTALHO",
+    syllables: ["ES", "PAN", "TA", "LHO"],
+    imageUrl: "https://images.pexels.com/photos/8961667/pexels-photo-8961667.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["FA", "ZEN", "DA", "PÁS", "SA", "RO", "MI", "LHO"],
+    level: 3
+  },
+  {
+    id: "word27",
+    word: "CALENDÁRIO",
+    syllables: ["CA", "LEN", "DÁ", "RIO"],
+    imageUrl: "https://images.pexels.com/photos/273153/pexels-photo-273153.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["DA", "TA", "DI", "A", "ME", "SES", "HO", "RAS"],
+    level: 3
+  },
+  {
+    id: "word28",
+    word: "ASTRONAUTA",
+    syllables: ["AS", "TRO", "NAU", "TA"],
+    imageUrl: "https://images.pexels.com/photos/2156/sky-earth-space-working.jpg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["ES", "PA", "ÇO", "FO", "GUE", "TE", "LU", "A"],
+    level: 3
+  },
+  {
+    id: "word29",
+    word: "GIRASSOL",
+    syllables: ["GI", "RAS", "SOL"],
+    imageUrl: "https://images.pexels.com/photos/46216/sunflower-flowers-bright-yellow-46216.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["FLOR", "A", "MA", "RE", "LO", "CAM", "PO"],
+    level: 3
+  },
+  {
+    id: "word30",
+    word: "ABACATE",
+    syllables: ["A", "BA", "CA", "TE"],
+    imageUrl: "https://images.pexels.com/photos/2228553/pexels-photo-2228553.jpeg?auto=compress&cs=tinysrgb&w=600",
+    distractors: ["FRU", "TA", "VER", "DE", "SA", "LA", "DA"],
     level: 3
   }
 ];
@@ -199,7 +364,7 @@ export const getSyllablesForWord = (wordData: WordData, includeDistractors: bool
 // Função para criar as zonas de soltar para uma palavra
 export const getDropZonesForWord = (wordData: WordData): {id: string, text: string | null}[] => {
   return wordData.syllables.map((_, index) => ({
-    id: `zone${index + 1}`,
-    text: null
+    id: `drop_${index}`,
+    text: null // Inicialmente vazio
   }));
 }; 

@@ -59,6 +59,7 @@ const Tutorial: React.FC<TutorialProps> = ({ onComplete }) => {
     if (step < tutorialSteps.length - 1) {
       setStep(step + 1);
     } else {
+      console.log('Tutorial concluído, chamando onComplete');
       onComplete();
     }
   };

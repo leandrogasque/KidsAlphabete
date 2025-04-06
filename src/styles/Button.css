@@ -1,0 +1,135 @@
+.custom-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  color: #333;
+  min-width: 120px;
+}
+
+.custom-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.custom-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Variantes */
+.custom-button.primary {
+  background-color: #4a6bff;
+  color: white;
+}
+
+.custom-button.primary:hover {
+  background-color: #3a59e8;
+}
+
+.custom-button.secondary {
+  background-color: #ff6b4a;
+  color: white;
+}
+
+.custom-button.secondary:hover {
+  background-color: #e85a3a;
+}
+
+/* Tamanhos */
+.custom-button.small {
+  padding: 8px 16px;
+  font-size: 14px;
+  min-width: 90px;
+}
+
+.custom-button.full-width {
+  width: 100%;
+}
+
+/* Estado desabilitado */
+.custom-button.disabled {
+  background-color: #e0e0e0;
+  color: #888;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.custom-button.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Efeito de ripple */
+.custom-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.custom-button:focus:not(:active)::after {
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .custom-button {
+    padding: 10px 20px;
+    font-size: 15px;
+    min-width: 110px;
+  }
+  
+  .custom-button.small {
+    padding: 6px 14px;
+    font-size: 13px;
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-button {
+    padding: 8px 16px;
+    font-size: 14px;
+    min-width: 100px;
+  }
+  
+  .custom-button.small {
+    padding: 5px 12px;
+    font-size: 12px;
+    min-width: 70px;
+  }
+} 

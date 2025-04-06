@@ -126,3 +126,70 @@ body {
 .pulse-animation {
   animation: pulse-glow 1.5s infinite;
 }
+
+/* Estilos para o modo "Forma a Frase" */
+.form-sentence-container {
+  @apply container-game flex flex-col items-center;
+}
+
+.form-sentence-container .game-container {
+  @apply bg-white rounded-2xl shadow-lg p-4 w-full max-w-2xl;
+}
+
+.form-sentence-container .image-container {
+  @apply mb-4 rounded-xl overflow-hidden h-48 flex items-center justify-center bg-gray-100;
+}
+
+.form-sentence-container .sentence-image {
+  @apply w-full h-full object-cover;
+}
+
+.form-sentence-container .feedback-message {
+  @apply text-center text-lg mb-4 font-comic;
+}
+
+.form-sentence-container .feedback-message.correct {
+  @apply text-green-600 font-bold;
+}
+
+.form-sentence-container .feedback-message.incorrect {
+  @apply text-red-500 font-bold;
+}
+
+.form-sentence-container .sentence-area {
+  @apply flex flex-wrap gap-2 justify-center items-center mb-6 p-4 bg-gray-50 rounded-xl;
+}
+
+.form-sentence-container .drop-zone {
+  @apply min-w-[80px] min-h-[50px] font-fredoka text-xl m-1;
+}
+
+.form-sentence-container .drop-zone.filled {
+  @apply border-solid border-accent;
+  background-color: var(--color-accent-light);
+}
+
+.form-sentence-container .drop-zone.correct {
+  @apply border-solid border-green-500;
+  background-color: var(--color-success-light);
+}
+
+.form-sentence-container .drop-zone.incorrect {
+  @apply bg-red-100 border-solid border-red-400;
+}
+
+.form-sentence-container .available-words {
+  @apply flex flex-wrap gap-2 justify-center mt-4;
+}
+
+.form-sentence-container .drag-item {
+  @apply text-lg py-1 px-3 m-1;
+}
+
+.form-sentence-container .game-container.correct {
+  @apply border-4 border-green-500;
+}
+
+.form-sentence-container .game-container.incorrect {
+  @apply border-4 border-red-400;
+}

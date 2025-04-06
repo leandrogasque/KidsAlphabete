@@ -8,11 +8,17 @@ import {
   getWordsByLevel, 
   getLevelDetails 
 } from '../utils/gameData';
+import {
+  SentenceData,
+  getSentencesByLevel,
+  getSentenceById
+} from '../utils/sentenceData';
 
 // Interface para o estado de progresso do jogador
 interface PlayerProgress {
   currentLevel: number;
   completedWords: string[];
+  completedSentences: string[];
   score: number;
   streakCount: number;
 }
@@ -23,14 +29,18 @@ interface GameContextType {
   currentMode: GameMode;
   currentLevel: LevelData;
   currentWord: WordData | null;
+  currentSentence: SentenceData | null;
   wordsList: WordData[];
+  sentencesList: SentenceData[];
   playerProgress: PlayerProgress;
   isLoading: boolean;
   
   // Funções
   startGame: (modeId: string, levelId: number) => void;
   nextWord: () => void;
+  nextSentence: () => void;
   completeWord: (wordId: string) => void;
+  completeSentence: (sentenceId: string) => void;
   resetProgress: () => void;
   setGameMode: (modeId: string) => void;
   setGameLevel: (levelId: number) => void;
@@ -41,10 +51,13 @@ const initialGameContext: GameContextType = {
   currentMode: gameModes[0],
   currentLevel: levels[0],
   currentWord: null,
+  currentSentence: null,
   wordsList: [],
+  sentencesList: [],
   playerProgress: {
     currentLevel: 1,
     completedWords: [],
+    completedSentences: [],
     score: 0,
     streakCount: 0
   },
@@ -52,7 +65,9 @@ const initialGameContext: GameContextType = {
   
   startGame: () => {},
   nextWord: () => {},
+  nextSentence: () => {},
   completeWord: () => {},
+  completeSentence: () => {},
   resetProgress: () => {},
   setGameMode: () => {},
   setGameLevel: () => {}
@@ -75,37 +90,87 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const [currentMode, setCurrentMode] = useState<GameMode>(gameModes[0]);
   const [currentLevel, setCurrentLevel] = useState<LevelData>(levels[0]);
   const [currentWord, setCurrentWord] = useState<WordData | null>(null);
+  const [currentSentence, setCurrentSentence] = useState<SentenceData | null>(null);
   const [wordsList, setWordsList] = useState<WordData[]>([]);
+  const [sentencesList, setSentencesList] = useState<SentenceData[]>([]);
   const [playerProgress, setPlayerProgress] = useState<PlayerProgress>({
     currentLevel: 1,
     completedWords: [],
+    completedSentences: [],
     score: 0,
     streakCount: 0
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Iniciar o jogo com um modo e nível específicos
+  // Função para iniciar o jogo
   const startGame = (modeId: string, levelId: number) => {
-    setIsLoading(true);
+    console.log('GameContext: Iniciando jogo', { modeId, levelId });
     
-    // Definir o modo e nível
-    const mode = gameModes.find(m => m.id === modeId) || gameModes[0];
-    const level = getLevelDetails(levelId) || levels[0];
-    
-    setCurrentMode(mode);
-    setCurrentLevel(level);
-    
-    // Obter palavras para o nível selecionado
-    const words = getWordsByLevel(level.id);
-    setWordsList(words);
-    
-    // Selecionar a primeira palavra aleatoriamente
-    if (words.length > 0) {
-      const randomIndex = Math.floor(Math.random() * words.length);
-      setCurrentWord(words[randomIndex]);
+    try {
+      // Encontrar o modo e o nível atual
+      const mode = gameModes.find(m => m.id === modeId);
+      const level = levels.find(l => l.id === levelId);
+      
+      console.log('GameContext: Modo e nível encontrados', { mode, level });
+      
+      if (!mode || !level) {
+        console.error('GameContext: Modo ou nível não encontrado');
+        return;
+      }
+
+      // Atualizar os estados
+      setCurrentMode(mode);
+      setCurrentLevel(level);
+      
+      // Limpar estados anteriores
+      console.log('GameContext: Limpando estados anteriores');
+      setCurrentWord(null);
+      setCurrentSentence(null);
+
+      // Inicializar dados do jogo com base no modo
+      console.log('GameContext: Inicializando dados do jogo para o modo', modeId);
+      
+      if (modeId === 'complete-word') {
+        try {
+          // Obter palavras para o nível atual
+          const levelWords = getWordsByLevel(levelId);
+          console.log('GameContext: Palavras obtidas para o nível', levelWords);
+          
+          if (levelWords && levelWords.length > 0) {
+            // Escolher uma palavra aleatória para começar
+            const randomIndex = Math.floor(Math.random() * levelWords.length);
+            console.log('GameContext: Selecionando palavra inicial', { index: randomIndex, word: levelWords[randomIndex] });
+            setCurrentWord(levelWords[randomIndex]);
+          } else {
+            console.error('GameContext: Nenhuma palavra encontrada para o nível', levelId);
+          }
+        } catch (error) {
+          console.error('GameContext: Erro ao obter palavras', error);
+        }
+      } 
+      else if (modeId === 'form-sentence') {
+        try {
+          // Obter frases para o nível atual
+          const levelSentences = getSentencesByLevel(levelId);
+          console.log('GameContext: Frases obtidas para o nível', levelSentences);
+          
+          if (levelSentences && levelSentences.length > 0) {
+            // Escolher uma frase aleatória para começar
+            const randomIndex = Math.floor(Math.random() * levelSentences.length);
+            console.log('GameContext: Selecionando frase inicial', { index: randomIndex, sentence: levelSentences[randomIndex] });
+            setCurrentSentence(levelSentences[randomIndex]);
+          } else {
+            console.error('GameContext: Nenhuma frase encontrada para o nível', levelId);
+          }
+        } catch (error) {
+          console.error('GameContext: Erro ao obter frases', error);
+        }
+      }
+      
+      console.log('GameContext: Jogo iniciado com sucesso!');
+    } catch (error) {
+      console.error('GameContext: Erro ao iniciar o jogo', error);
     }
-    
-    setIsLoading(false);
   };
 
   // Passar para a próxima palavra
@@ -185,6 +250,27 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     }
   };
 
+  // Passar para a próxima frase - versão simplificada sem timeouts
+  const nextSentence = () => {
+    try {
+      // Obter frases para o nível atual, caso a lista esteja vazia
+      let availableSentences = sentencesList;
+      
+      if (!availableSentences || availableSentences.length === 0) {
+        availableSentences = getSentencesByLevel(currentLevel.id);
+        setSentencesList(availableSentences);
+      }
+      
+      if (availableSentences && availableSentences.length > 0) {
+        // Selecionar uma frase aleatória
+        const randomIndex = Math.floor(Math.random() * availableSentences.length);
+        setCurrentSentence(availableSentences[randomIndex]);
+      }
+    } catch (error) {
+      console.error('GameContext - Erro ao avançar para próxima frase:', error);
+    }
+  };
+
   // Marcar uma palavra como completada
   const completeWord = (wordId: string) => {
     // Verificar se a palavra já foi completada para evitar duplicidades
@@ -207,11 +293,34 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     });
   };
 
+  // Marcar uma frase como completada
+  const completeSentence = (sentenceId: string) => {
+    // Verificar se a frase já foi completada para evitar duplicidades
+    if (playerProgress.completedSentences.includes(sentenceId)) return;
+    
+    // Atualizar o progresso do jogador
+    setPlayerProgress(prev => {
+      const updatedCompletedSentences = [...prev.completedSentences, sentenceId];
+      const updatedStreakCount = prev.streakCount + 1;
+      const baseScore = 15 * currentLevel.id; // Pontuação base baseada no nível (maior que para palavras)
+      const streakBonus = Math.floor(updatedStreakCount / 3) * 8; // Bônus por sequência de acertos
+      const pointsEarned = baseScore + streakBonus;
+      
+      return {
+        ...prev,
+        completedSentences: updatedCompletedSentences,
+        score: prev.score + pointsEarned,
+        streakCount: updatedStreakCount
+      };
+    });
+  };
+
   // Reiniciar o progresso do jogador
   const resetProgress = () => {
     setPlayerProgress({
       currentLevel: 1,
       completedWords: [],
+      completedSentences: [],
       score: 0,
       streakCount: 0
     });
@@ -239,7 +348,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
       setPlayerProgress(prev => ({
         ...prev,
         currentLevel: levelId,
-        completedWords: [] // Reset das palavras completadas para o novo nível
+        completedWords: [], // Reset das palavras completadas para o novo nível
+        completedSentences: [] // Reset das frases completadas para o novo nível
       }));
       
       // Reiniciar o jogo com o modo atual e o novo nível
@@ -248,24 +358,27 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   };
 
   // Valor do contexto
-  const value: GameContextType = {
+  const contextValue: GameContextType = {
     currentMode,
     currentLevel,
     currentWord,
+    currentSentence,
     wordsList,
+    sentencesList,
     playerProgress,
     isLoading,
-    
     startGame,
     nextWord,
+    nextSentence,
     completeWord,
+    completeSentence,
     resetProgress,
     setGameMode,
     setGameLevel
   };
 
   return (
-    <GameContext.Provider value={value}>
+    <GameContext.Provider value={contextValue}>
       {children}
     </GameContext.Provider>
   );

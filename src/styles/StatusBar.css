@@ -1,0 +1,88 @@
+.status-bar {
+  display: flex;
+  justify-content: space-around;
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.status-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.status-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Efeito especial para sequência */
+.status-item:nth-child(3) .status-value {
+  color: #4a6bff;
+  position: relative;
+}
+
+.status-item:nth-child(3) .status-value:after {
+  content: '🔥';
+  margin-left: 5px;
+  font-size: 16px;
+  visibility: hidden;
+}
+
+/* Mostrar emoji de fogo quando a sequência for maior que 2 */
+.status-item:nth-child(3) .status-value[data-value="3"]:after,
+.status-item:nth-child(3) .status-value[data-value="4"]:after,
+.status-item:nth-child(3) .status-value[data-value="5"]:after,
+.status-item:nth-child(3) .status-value[data-value="6"]:after,
+.status-item:nth-child(3) .status-value[data-value="7"]:after,
+.status-item:nth-child(3) .status-value[data-value="8"]:after,
+.status-item:nth-child(3) .status-value[data-value="9"]:after,
+.status-item:nth-child(3) .status-value[data-value="10"]:after {
+  visibility: visible;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .status-bar {
+    padding: 10px 12px;
+  }
+  
+  .status-label {
+    font-size: 12px;
+  }
+  
+  .status-value {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-bar {
+    padding: 8px;
+  }
+  
+  .status-item {
+    padding: 0 8px;
+  }
+  
+  .status-label {
+    font-size: 11px;
+  }
+  
+  .status-value {
+    font-size: 16px;
+  }
+} 

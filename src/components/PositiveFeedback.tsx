@@ -3,14 +3,16 @@ import { useEffect, useState } from 'react';
 import AudioButton from './AudioButton';
 
 interface PositiveFeedbackProps {
+  text?: string;
   onComplete?: () => void;
 }
 
 /**
  * Componente que exibe uma animação e som de feedback positivo
+ * @param text - Texto personalizado para o feedback
  * @param onComplete - Função chamada quando a animação terminar
  */
-const PositiveFeedback = ({ onComplete }: PositiveFeedbackProps) => {
+const PositiveFeedback = ({ text = "Muito bem! Você completou a palavra corretamente!", onComplete }: PositiveFeedbackProps) => {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -87,8 +89,8 @@ const PositiveFeedback = ({ onComplete }: PositiveFeedbackProps) => {
               <span className="text-6xl mb-4 inline-block">⭐</span>
             </motion.div>
             <h2 className="text-4xl font-bold text-primary mb-4 font-fredoka">Muito bem!</h2>
-            <p className="text-xl text-gray-700 mb-6 font-comic">Você completou a palavra corretamente!</p>
-            <AudioButton text="Muito bem! Você completou a palavra corretamente!" autoPlay={true} className="hidden" />
+            <p className="text-xl text-gray-700 mb-6 font-comic">{text}</p>
+            <AudioButton text={text} autoPlay={true} className="hidden" />
           </motion.div>
         </div>
       )}
