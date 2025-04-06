@@ -238,3 +238,47 @@ input, textarea, [contenteditable] {
 .form-sentence-container .game-container.incorrect {
   @apply border-4 border-red-400;
 }
+
+/* Estilos para a área dos pais */
+.parent-area {
+  @apply bg-white rounded-2xl shadow-2xl;
+}
+
+/* Área de navegação de tabs */
+.tab-nav {
+  @apply flex border-b overflow-x-auto;
+}
+
+.tab-nav-item {
+  @apply py-3 px-6 font-fredoka transition-colors duration-200;
+}
+
+.tab-nav-item.active {
+  @apply text-primary border-b-2 border-primary;
+}
+
+.tab-nav-item:not(.active) {
+  @apply text-gray-500 hover:bg-gray-50;
+}
+
+/* Estilos para elementos de progresso */
+.progress-container {
+  @apply h-2 bg-gray-200 rounded-full overflow-hidden;
+}
+
+.progress-fill-primary {
+  @apply h-full bg-primary;
+}
+
+.progress-fill-secondary {
+  @apply h-full bg-secondary;
+}
+
+.progress-fill-gradient {
+  @apply h-full bg-gradient-to-r from-secondary to-primary;
+}
+
+/* Botão de checkbox melhorado */
+.checkbox-improved {
+  @apply mr-2 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary;
+}

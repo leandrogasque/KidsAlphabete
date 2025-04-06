@@ -6,12 +6,16 @@ import { sentencesList } from '../utils/sentenceData';
 
 interface ProgressDashboardProps {
   onClose: () => void;
+  isEmbedded?: boolean; // Indica se está integrado em outro componente
 }
 
 /**
  * Componente que exibe um painel de progresso detalhado para pais/educadores
  */
-const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
+const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ 
+  onClose,
+  isEmbedded = false
+}) => {
   const { playerProgress, resetProgress } = useGameContext();
   const [activeTab, setActiveTab] = useState<'overview' | 'levels' | 'words' | 'sentences'>('overview');
 
@@ -108,22 +112,39 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
   const today = formatDate(new Date());
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <motion.div 
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="bg-white rounded-2xl overflow-hidden max-w-4xl w-full shadow-2xl"
-      >
-        <div className="p-6 bg-primary text-white flex justify-between items-center">
-          <h2 className="text-2xl font-bold font-fredoka">Painel de Progresso</h2>
-          <button 
-            onClick={onClose}
-            className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-full"
+    <>
+      {!isEmbedded ? (
+        // Versão standalone com modal próprio
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl overflow-hidden max-w-4xl w-full shadow-2xl"
           >
-            ✕
-          </button>
+            <div className="p-6 bg-primary text-white flex justify-between items-center">
+              <h2 className="text-2xl font-bold font-fredoka">Painel de Progresso</h2>
+              <button 
+                onClick={onClose}
+                className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-full"
+              >
+                ✕
+              </button>
+            </div>
+            {/* Conteúdo existente do painel */}
+            {renderContent()}
+          </motion.div>
         </div>
-        
+      ) : (
+        // Versão integrada sem modal e cabeçalho
+        renderContent()
+      )}
+    </>
+  );
+
+  // Função para renderizar o conteúdo do painel
+  function renderContent() {
+    return (
+      <>
         {/* Navegação entre abas */}
         <div className="flex border-b overflow-x-auto">
           <button 
@@ -155,24 +176,24 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
         <div className="p-6">
           {/* Visão Geral */}
           {activeTab === 'overview' && (
-            <div>
+            <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2">
               <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                <div className="flex flex-wrap items-center mb-4">
-                  <div className="mr-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                  <div>
                     <h3 className="text-gray-500 text-sm mb-1">Data</h3>
                     <p className="font-bold">{today}</p>
                   </div>
-                  <div className="mr-6">
+                  <div>
                     <h3 className="text-gray-500 text-sm mb-1">Pontuação Total</h3>
                     <p className="font-bold text-xl text-primary">{playerProgress.score} pontos</p>
                   </div>
-                  <div className="mr-6">
+                  <div>
                     <h3 className="text-gray-500 text-sm mb-1">Nível Atual</h3>
                     <p className="font-bold">{levels.find(l => l.id === playerProgress.currentLevel)?.name}</p>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                   <div>
                     <h3 className="text-gray-500 text-sm mb-1">Palavras Completadas</h3>
                     <p className="font-bold">{playerProgress.completedWords.length} de {wordsList.length}</p>
@@ -180,9 +201,9 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                       <span className="text-sm text-gray-500">Progresso</span>
                       <span className="text-sm font-bold">{calculateWordCompletion()}%</span>
                     </div>
-                    <div className="progress-bar">
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div 
-                        className="progress-bar-fill bg-secondary"
+                        className="h-full bg-secondary"
                         style={{ width: `${calculateWordCompletion()}%` }}
                       />
                     </div>
@@ -195,9 +216,9 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                       <span className="text-sm text-gray-500">Progresso</span>
                       <span className="text-sm font-bold">{calculateSentenceCompletion()}%</span>
                     </div>
-                    <div className="progress-bar">
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div 
-                        className="progress-bar-fill"
+                        className="h-full bg-primary"
                         style={{ width: `${calculateSentenceCompletion()}%` }}
                       />
                     </div>
@@ -209,29 +230,42 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                     <span className="text-sm text-gray-500">Progresso Geral</span>
                     <span className="text-sm font-bold">{calculateOverallCompletion()}%</span>
                   </div>
-                  <div className="progress-bar">
+                  <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                     <div 
-                      className="progress-bar-fill"
+                      className="h-full bg-gradient-to-r from-secondary to-primary"
                       style={{ width: `${calculateOverallCompletion()}%` }}
                     />
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white p-4 rounded-lg border mb-4">
+              <div className="bg-white p-4 rounded-lg border mb-6">
                 <h3 className="text-lg font-bold mb-3 font-fredoka">Resumo de Desempenho</h3>
                 <p className="text-gray-700 mb-4">
                   A criança está no nível {playerProgress.currentLevel} ({levels.find(l => l.id === playerProgress.currentLevel)?.name}) 
                   e completou {playerProgress.completedWords.length} palavras e {playerProgress.completedSentences.length} frases até o momento.
                 </p>
                 
-                <h4 className="font-bold text-gray-700 mb-2">Recomendações:</h4>
-                <ul className="list-disc pl-5 text-gray-700">
-                  <li className="mb-1">Pratique palavras e frases do nível atual regularmente</li>
-                  <li className="mb-1">Incentive a criança a ouvir as sílabas/palavras antes de arrastar</li>
-                  <li className="mb-1">Alterne entre os modos "Complete a Palavra" e "Forme a Frase"</li>
-                  <li className="mb-1">Comemore cada conquista</li>
-                </ul>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-bold text-gray-700 mb-2">Recomendações:</h4>
+                    <ul className="list-disc pl-5 text-gray-700">
+                      <li className="mb-1">Pratique palavras e frases do nível atual regularmente</li>
+                      <li className="mb-1">Incentive a criança a ouvir as sílabas/palavras antes de arrastar</li>
+                      <li className="mb-1">Alterne entre os modos "Complete a Palavra" e "Forme a Frase"</li>
+                      <li className="mb-1">Comemore cada conquista</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                    <h4 className="font-bold text-yellow-800 mb-2 flex items-center">
+                      <span className="mr-2">💡</span> Dica do dia
+                    </h4>
+                    <p className="text-gray-700 text-sm">
+                      Jogar por períodos curtos (15-20 minutos) todos os dias é mais eficiente para o aprendizado do que sessões longas menos frequentes.
+                    </p>
+                  </div>
+                </div>
               </div>
               
               <div className="flex justify-end">
@@ -247,8 +281,13 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
           
           {/* Níveis */}
           {activeTab === 'levels' && (
-            <div>
-              <h3 className="text-lg font-bold mb-4 font-fredoka">Progresso por Nível</h3>
+            <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold font-fredoka">Progresso por Nível</h3>
+                <div className="text-sm text-gray-500">
+                  {calculateLevelStats().filter(stat => stat.overallPercentage === 100).length} de {levels.length} níveis concluídos
+                </div>
+              </div>
               
               <div className="grid gap-4">
                 {calculateLevelStats().map(({
@@ -284,9 +323,9 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                           <span className="text-sm text-gray-500">Palavras</span>
                           <span className="text-sm font-bold">{wordPercentage}% ({completedWords}/{totalWords})</span>
                         </div>
-                        <div className="progress-bar">
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div 
-                            className="progress-bar-fill bg-secondary"
+                            className="h-full bg-secondary"
                             style={{ width: `${wordPercentage}%` }}
                           />
                         </div>
@@ -297,9 +336,9 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                           <span className="text-sm text-gray-500">Frases</span>
                           <span className="text-sm font-bold">{sentencePercentage}% ({completedSentences}/{totalSentences})</span>
                         </div>
-                        <div className="progress-bar">
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div 
-                            className="progress-bar-fill"
+                            className="h-full bg-primary"
                             style={{ width: `${sentencePercentage}%` }}
                           />
                         </div>
@@ -311,9 +350,9 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                         <span className="text-sm text-gray-500">Progresso Geral</span>
                         <span className="text-sm font-bold">{overallPercentage}% ({completedItems}/{totalItems})</span>
                       </div>
-                      <div className="progress-bar">
+                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div 
-                          className="progress-bar-fill"
+                          className="h-full bg-gradient-to-r from-secondary to-primary"
                           style={{ width: `${overallPercentage}%` }}
                         />
                       </div>
@@ -326,10 +365,15 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
           
           {/* Palavras */}
           {activeTab === 'words' && (
-            <div>
-              <h3 className="text-lg font-bold mb-4 font-fredoka">Palavras Aprendidas</h3>
+            <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold font-fredoka">Palavras Aprendidas</h3>
+                <div className="text-sm text-gray-500">
+                  {playerProgress.completedWords.length} de {wordsList.length} palavras
+                </div>
+              </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {getWordsList().map(word => (
                   <div 
                     key={word.id}
@@ -338,17 +382,17 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                     <div className="w-12 h-12 rounded overflow-hidden bg-gray-100 mr-3 flex-shrink-0">
                       <img src={word.imageUrl} alt={word.word} className="w-full h-full object-cover" />
                     </div>
-                    <div>
-                      <h4 className="font-bold">{word.word}</h4>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-bold truncate">{word.word}</h4>
                       <p className="text-xs text-gray-500">
                         Nível {word.level} • {word.syllables.length} sílabas
                       </p>
                     </div>
-                    <div className="ml-auto">
+                    <div className="ml-2 flex-shrink-0">
                       {word.completed ? (
-                        <span className="text-green-500 text-xl">✓</span>
+                        <span className="text-green-500 text-xl flex items-center justify-center w-8 h-8">✓</span>
                       ) : (
-                        <span className="text-gray-300 text-xl">○</span>
+                        <span className="text-gray-300 text-xl flex items-center justify-center w-8 h-8">○</span>
                       )}
                     </div>
                   </div>
@@ -359,8 +403,13 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
           
           {/* Frases */}
           {activeTab === 'sentences' && (
-            <div>
-              <h3 className="text-lg font-bold mb-4 font-fredoka">Frases Aprendidas</h3>
+            <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold font-fredoka">Frases Aprendidas</h3>
+                <div className="text-sm text-gray-500">
+                  {playerProgress.completedSentences.length} de {sentencesList.length} frases
+                </div>
+              </div>
               
               <div className="grid grid-cols-1 gap-3">
                 {getSentencesList().map(sentence => (
@@ -371,17 +420,17 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
                     <div className="w-12 h-12 rounded overflow-hidden bg-gray-100 mr-3 flex-shrink-0">
                       <img src={sentence.imageUrl} alt={sentence.words.join(' ')} className="w-full h-full object-cover" />
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold">{sentence.words.join(' ')}</h4>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold truncate">{sentence.words.join(' ')}</h4>
                       <p className="text-xs text-gray-500">
                         Nível {sentence.level} • {sentence.words.length} palavras
                       </p>
                     </div>
-                    <div className="ml-3">
+                    <div className="ml-2 flex-shrink-0">
                       {sentence.completed ? (
-                        <span className="text-green-500 text-xl">✓</span>
+                        <span className="text-green-500 text-xl flex items-center justify-center w-8 h-8">✓</span>
                       ) : (
-                        <span className="text-gray-300 text-xl">○</span>
+                        <span className="text-gray-300 text-xl flex items-center justify-center w-8 h-8">○</span>
                       )}
                     </div>
                   </div>
@@ -390,9 +439,9 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ onClose }) => {
             </div>
           )}
         </div>
-      </motion.div>
-    </div>
-  );
+      </>
+    );
+  }
 };
 
 export default ProgressDashboard; 

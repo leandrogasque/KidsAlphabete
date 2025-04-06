@@ -6,8 +6,9 @@ import { DndContext } from '@dnd-kit/core'
 
 // Versão simplificada para evitar problemas com lazy loading
 import CompleteWord from './pages/CompleteWord'
-// Lazy loading apenas do painel de progresso
+// Lazy loading dos componentes pesados
 const ProgressDashboard = lazy(() => import('./components/ProgressDashboard'))
+const ParentsArea = lazy(() => import('./pages/ParentsArea'))
 
 // Componente de loading
 const LoadingFallback = () => (
@@ -78,6 +79,7 @@ function AppContent() {
   const [started, setStarted] = useState(false)
   const [showLevelSelect, setShowLevelSelect] = useState(false)
   const [showProgressDashboard, setShowProgressDashboard] = useState(false)
+  const [showParentsArea, setShowParentsArea] = useState(false)
   const { 
     startGame, 
     currentLevel, 
@@ -103,6 +105,14 @@ function AppContent() {
 
   const handleHideProgressDashboard = useCallback(() => {
     setShowProgressDashboard(false)
+  }, [])
+  
+  const handleShowParentsArea = useCallback(() => {
+    setShowParentsArea(true)
+  }, [])
+
+  const handleHideParentsArea = useCallback(() => {
+    setShowParentsArea(false)
   }, [])
 
   const handleModeSelect = useCallback((modeId: string) => {
@@ -158,7 +168,7 @@ function AppContent() {
                 
                 <MemoizedButton
                   className="btn-outline text-lg px-6 py-2 mt-8 block mx-auto"
-                  onClick={handleShowProgressDashboard}
+                  onClick={handleShowParentsArea}
                 >
                   Área dos Pais
                 </MemoizedButton>
@@ -217,11 +227,11 @@ function AppContent() {
         <div className="relative">
           {renderGameComponent()}
           <button 
-            onClick={handleShowProgressDashboard}
+            onClick={handleShowParentsArea}
             className="fixed bottom-4 right-4 bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-shadow"
-            title="Ver progresso"
+            title="Área dos Pais"
           >
-            📊
+            👨‍👩‍👧‍👦
           </button>
         </div>
       )}
@@ -230,6 +240,13 @@ function AppContent() {
       {showProgressDashboard && (
         <Suspense fallback={<LoadingFallback />}>
           <ProgressDashboard onClose={handleHideProgressDashboard} />
+        </Suspense>
+      )}
+      
+      {/* Área dos Pais com lazy loading */}
+      {showParentsArea && (
+        <Suspense fallback={<LoadingFallback />}>
+          <ParentsArea onClose={handleHideParentsArea} />
         </Suspense>
       )}
     </div>

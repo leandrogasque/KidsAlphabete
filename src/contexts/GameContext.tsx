@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { 
   WordData, 
   LevelData, 
@@ -13,6 +13,14 @@ import {
   getSentencesByLevel,
   getSentenceById
 } from '../utils/sentenceData';
+
+// Interface para as configurações do jogo
+interface GameSettings {
+  parentPin: string;
+  soundEffects: boolean;
+  backgroundMusic: boolean;
+  hapticFeedback: boolean;
+}
 
 // Interface para o estado de progresso do jogador
 interface PlayerProgress {
@@ -34,6 +42,7 @@ interface GameContextType {
   sentencesList: SentenceData[];
   playerProgress: PlayerProgress;
   isLoading: boolean;
+  settings: GameSettings;
   
   // Funções
   startGame: (modeId: string, levelId: number) => void;
@@ -44,7 +53,16 @@ interface GameContextType {
   resetProgress: () => void;
   setGameMode: (modeId: string) => void;
   setGameLevel: (levelId: number) => void;
+  updateSettings: (newSettings: Partial<GameSettings>) => void;
 }
+
+// Configurações iniciais padrão
+const defaultSettings: GameSettings = {
+  parentPin: '1234', // PIN padrão para acesso dos pais
+  soundEffects: true,
+  backgroundMusic: true,
+  hapticFeedback: true
+};
 
 // Valores iniciais para o contexto
 const initialGameContext: GameContextType = {
@@ -62,6 +80,7 @@ const initialGameContext: GameContextType = {
     streakCount: 0
   },
   isLoading: false,
+  settings: defaultSettings,
   
   startGame: () => {},
   nextWord: () => {},
@@ -70,7 +89,8 @@ const initialGameContext: GameContextType = {
   completeSentence: () => {},
   resetProgress: () => {},
   setGameMode: () => {},
-  setGameLevel: () => {}
+  setGameLevel: () => {},
+  updateSettings: () => {}
 };
 
 // Criar o contexto
@@ -101,6 +121,44 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     streakCount: 0
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [settings, setSettings] = useState<GameSettings>(defaultSettings);
+
+  // Carregar progresso e configurações salvos
+  useEffect(() => {
+    try {
+      // Carregar progresso
+      const savedProgress = localStorage.getItem('playerProgress');
+      if (savedProgress) {
+        setPlayerProgress(JSON.parse(savedProgress));
+      }
+      
+      // Carregar configurações
+      const savedSettings = localStorage.getItem('gameSettings');
+      if (savedSettings) {
+        setSettings(JSON.parse(savedSettings));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados salvos:', error);
+    }
+  }, []);
+
+  // Salvar progresso quando for atualizado
+  useEffect(() => {
+    try {
+      localStorage.setItem('playerProgress', JSON.stringify(playerProgress));
+    } catch (error) {
+      console.error('Erro ao salvar progresso:', error);
+    }
+  }, [playerProgress]);
+
+  // Salvar configurações quando forem atualizadas
+  useEffect(() => {
+    try {
+      localStorage.setItem('gameSettings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Erro ao salvar configurações:', error);
+    }
+  }, [settings]);
 
   // Função para iniciar o jogo
   const startGame = (modeId: string, levelId: number) => {
@@ -357,6 +415,14 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     }
   };
 
+  // Função para atualizar configurações
+  const updateSettings = (newSettings: Partial<GameSettings>) => {
+    setSettings(prev => ({
+      ...prev,
+      ...newSettings
+    }));
+  };
+
   // Valor do contexto
   const contextValue: GameContextType = {
     currentMode,
@@ -367,6 +433,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     sentencesList,
     playerProgress,
     isLoading,
+    settings,
     startGame,
     nextWord,
     nextSentence,
@@ -374,7 +441,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     completeSentence,
     resetProgress,
     setGameMode,
-    setGameLevel
+    setGameLevel,
+    updateSettings
   };
 
   return (
