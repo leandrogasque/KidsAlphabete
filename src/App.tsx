@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { GameProvider, useGameContext } from './contexts/GameContext'
 import { levels, gameModes } from './utils/gameData'
-import { DndProvider } from 'react-dnd'
-import { HTML5Backend } from 'react-dnd-html5-backend'
+import { DndContext } from '@dnd-kit/core'
 
 // Versão simplificada para evitar problemas com lazy loading
 import CompleteWord from './pages/CompleteWord'
@@ -240,11 +239,11 @@ function AppContent() {
 // Componente App memoizado
 const App = React.memo(() => {
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndContext>
       <GameProvider>
         <AppContent />
       </GameProvider>
-    </DndProvider>
+    </DndContext>
   )
 })
 

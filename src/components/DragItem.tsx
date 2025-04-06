@@ -1,11 +1,11 @@
-import { useDrag } from 'react-dnd';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
 
 export interface DragItemProps {
   id: string;
   text: string;
-  type: string;
   onDragStart?: () => void;
   onClick?: () => void;
   isDisabled?: boolean;
@@ -15,20 +15,20 @@ export interface DragItemProps {
  * Componente arrastável que representa uma sílaba ou letra
  * @param id - Identificador único do item
  * @param text - Texto a ser exibido (ex: "BA", "NA")
- * @param type - Tipo do item para o sistema de drag and drop
  * @param onDragStart - Função chamada quando o arrasto inicia
  * @param onClick - Função chamada quando o item é clicado
  * @param isDisabled - Se o item está desabilitado (já foi usado)
  */
-const DragItem = ({ id, text, type, onDragStart, onClick, isDisabled = false }: DragItemProps) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type,
-    item: { id, text },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-    canDrag: !isDisabled,
-  }));
+const DragItem = ({ id, text, onDragStart, onClick, isDisabled = false }: DragItemProps) => {
+  const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
+    id,
+    data: { text },
+    disabled: isDisabled,
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+  };
 
   useEffect(() => {
     if (isDragging && onDragStart) {
@@ -36,11 +36,14 @@ const DragItem = ({ id, text, type, onDragStart, onClick, isDisabled = false }: 
     }
   }, [isDragging, onDragStart]);
 
-  console.log(`Renderizando DragItem: ${id}, tipo: ${type}, texto: ${text}`);
+  console.log(`Renderizando DragItem: ${id}, texto: ${text}`);
 
   return (
     <motion.div
-      ref={drag}
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
       whileHover={!isDisabled ? { scale: 1.05 } : {}}
       whileTap={!isDisabled ? { scale: 0.95 } : {}}
       className={`drag-item ${isDragging ? 'opacity-50' : 'opacity-100'} ${isDisabled ? 'bg-gray-400 cursor-not-allowed' : ''}`}

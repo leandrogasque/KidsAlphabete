@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
+import { DndContext, DragEndEvent, useSensors, useSensor, PointerSensor, TouchSensor } from '@dnd-kit/core';
 import DragItem from '../components/DragItem';
 import DropZone from '../components/DropZone';
 import AudioButton from '../components/AudioButton';
 import PositiveFeedback from '../components/PositiveFeedback';
+import NegativeFeedback from '../components/NegativeFeedback';
 import RewardPopup from '../components/RewardPopup';
 import { playSyllable } from '../utils/speech';
 import { useGameContext } from '../contexts/GameContext';
@@ -100,6 +102,21 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
     currentMode 
   });
 
+  // Configure os sensores para o DnD
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 8,
+      },
+    })
+  );
+
   // Estado para os itens arrastáveis (sílabas)
   const [dragItems, setDragItems] = useState<DragItemType[]>([]);
 
@@ -109,8 +126,17 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
   // Estado para controlar o feedback positivo
   const [showSuccess, setShowSuccess] = useState(false);
   
+  // Estado para controlar o feedback negativo
+  const [showError, setShowError] = useState(false);
+  
   // Estado para controlar se a palavra foi completada corretamente
   const [isCompleted, setIsCompleted] = useState(false);
+  
+  // Estado para armazenar as tentativas incorretas
+  const [incorrectAttempts, setIncorrectAttempts] = useState<string[]>([]);
+  
+  // Estado para rastrear se o usuário interagiu com a palavra atual
+  const [hasInteracted, setHasInteracted] = useState(false);
   
   // Estado para controlar a exibição de recompensas
   const [reward, setReward] = useState<{
@@ -142,7 +168,10 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
         
         // Resetar os estados de conclusão
         setShowSuccess(false);
+        setShowError(false);
         setIsCompleted(false);
+        setIncorrectAttempts([]);
+        setHasInteracted(false);
       } catch (error) {
         console.error('Erro ao inicializar palavra:', error);
       }
@@ -153,7 +182,7 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
 
   // Verifica se a palavra foi completada corretamente
   useEffect(() => {
-    if (!currentWord) return;
+    if (!currentWord || !hasInteracted) return;
     
     const correctWord = currentWord.syllables;
     const currentText = dropZones.map(zone => zone.text);
@@ -161,78 +190,111 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
     // Verifica se todas as zonas estão preenchidas
     const allZonesFilled = currentText.every(text => text !== null);
     
-    // Verifica se a palavra está correta
-    const isCorrect = allZonesFilled && 
-      correctWord.every((syllable, index) => syllable === currentText[index]);
-    
-    if (isCorrect && !isCompleted) {
-      console.log('CompleteWord: Palavra completada corretamente');
-      // Aguarda um momento para mostrar o feedback
-      setTimeout(() => {
-        setShowSuccess(true);
-        setIsCompleted(true);
-        
-        // Atualizar o progresso do jogador
-        if (currentWord) {
-          completeWord(currentWord.id);
+    // Apenas verificar se todas as zonas estiverem preenchidas
+    if (allZonesFilled && !isCompleted) {
+      // Verifica se a palavra está correta
+      const isCorrect = correctWord.every((syllable, index) => syllable === currentText[index]);
+      
+      if (isCorrect) {
+        console.log('CompleteWord: Palavra completada corretamente');
+        // Aguarda um momento para mostrar o feedback
+        setTimeout(() => {
+          setShowSuccess(true);
+          setIsCompleted(true);
           
-          // Mostrar recompensa de pontos
-          const pointsEarned = 10 * currentLevel.id + Math.floor(playerProgress.streakCount / 3) * 5;
-          
-          setReward({
-            show: true,
-            type: 'points',
-            value: pointsEarned,
-            message: `Você ganhou ${pointsEarned} pontos por completar "${currentWord.word}"!`
-          });
-          
-          // Verificar se ganhou alguma conquista baseada no número de palavras completadas
-          const completedCount = playerProgress.completedWords.length + 1; // +1 para incluir a atual
-          
-          if (completedCount === 5) {
-            setTimeout(() => {
-              setReward({
-                show: true,
-                type: 'badge',
-                value: 'Iniciante',
-                message: 'Você completou 5 palavras! Continue assim!'
-              });
-            }, 1500);
-          } else if (completedCount === 10) {
-            setTimeout(() => {
-              setReward({
-                show: true,
-                type: 'badge',
-                value: 'Aprendiz',
-                message: 'Você completou 10 palavras! Você está indo muito bem!'
-              });
-            }, 1500);
+          // Atualizar o progresso do jogador
+          if (currentWord) {
+            completeWord(currentWord.id);
+            
+            // Mostrar recompensa de pontos
+            const pointsEarned = 10 * currentLevel.id + Math.floor(playerProgress.streakCount / 3) * 5;
+            
+            setReward({
+              show: true,
+              type: 'points',
+              value: pointsEarned,
+              message: `Você ganhou ${pointsEarned} pontos por completar "${currentWord.word}"!`
+            });
+            
+            // Verificar se ganhou alguma conquista baseada no número de palavras completadas
+            const completedCount = playerProgress.completedWords.length + 1; // +1 para incluir a atual
+            
+            if (completedCount === 5) {
+              setTimeout(() => {
+                setReward({
+                  show: true,
+                  type: 'badge',
+                  value: 'Iniciante',
+                  message: 'Você completou 5 palavras! Continue assim!'
+                });
+              }, 1500);
+            } else if (completedCount === 10) {
+              setTimeout(() => {
+                setReward({
+                  show: true,
+                  type: 'badge',
+                  value: 'Aprendiz',
+                  message: 'Você completou 10 palavras! Você está indo muito bem!'
+                });
+              }, 1500);
+            }
           }
-        }
-      }, 500);
+        }, 500);
+      } else {
+        console.log('CompleteWord: Palavra incorreta. Tentando novamente.');
+        setIncorrectAttempts([...incorrectAttempts, currentText.join('')]);
+        setShowError(true);
+        
+        // Limpar a tentativa após um curto período
+        setTimeout(() => {
+          // Resetar as zonas de soltar
+          setDropZones(prev => 
+            prev.map(zone => ({ ...zone, text: null }))
+          );
+          
+          // Resetar os itens arrastáveis
+          setDragItems(prev => 
+            prev.map(item => ({ ...item, used: false }))
+          );
+        }, 300);
+      }
     }
-  }, [dropZones, isCompleted, currentWord, completeWord, currentLevel.id, playerProgress.completedWords.length, playerProgress.streakCount]);
+  }, [dropZones, isCompleted, currentWord, completeWord, currentLevel.id, playerProgress.completedWords.length, playerProgress.streakCount, incorrectAttempts, hasInteracted]);
 
-  // Função chamada quando um item é solto em uma zona - memoizado com useCallback
-  const handleDrop = useCallback((zoneId: string, item: { id: string; text: string }) => {
-    console.log('CompleteWord: Item solto', { zoneId, item });
-    // Atualiza o estado das zonas de soltar
-    setDropZones(prev => 
-      prev.map(zone => 
-        zone.id === zoneId ? { ...zone, text: item.text } : zone
-      )
-    );
-
-    // Marca o item como usado
-    setDragItems(prev => 
-      prev.map(dragItem => 
-        dragItem.id === item.id ? { ...dragItem, used: true } : dragItem
-      )
-    );
-
-    // Reproduz o som da sílaba
-    playSyllable(item.text);
-  }, []);
+  // Função chamada quando um drag termina
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active) {
+      const zoneId = over.id.toString();
+      const itemData = active.data.current;
+      
+      // Apenas processar o drop se houver dados válidos
+      if (itemData && itemData.text) {
+        console.log('CompleteWord: Item solto', { zoneId, item: itemData });
+        
+        // Marca que o usuário interagiu com esta palavra
+        setHasInteracted(true);
+        
+        // Atualiza o estado das zonas de soltar
+        setDropZones(prev => 
+          prev.map(zone => 
+            zone.id === zoneId ? { ...zone, text: itemData.text } : zone
+          )
+        );
+    
+        // Marca o item como usado
+        setDragItems(prev => 
+          prev.map(dragItem => 
+            dragItem.id === active.id ? { ...dragItem, used: true } : dragItem
+          )
+        );
+    
+        // Reproduz o som da sílaba
+        playSyllable(itemData.text);
+      }
+    }
+  }, [setHasInteracted]);
 
   // Função para reiniciar o jogo - memoizado com useCallback
   const resetGame = useCallback(() => {
@@ -241,7 +303,10 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
     setDragItems([]);
     setDropZones([]);
     setShowSuccess(false);
+    setShowError(false); // Garantir que o feedback negativo esteja desligado
     setIsCompleted(false);
+    setIncorrectAttempts([]);
+    setHasInteracted(false);
     
     // Passar para a próxima palavra
     nextWord();
@@ -249,8 +314,9 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
 
   // Função chamada quando um item é clicado - memoizado com useCallback
   const handleItemClick = useCallback((text: string) => {
+    setHasInteracted(true);
     playSyllable(text);
-  }, []);
+  }, [setHasInteracted]);
 
   // Determinar número de colunas com base no número de zonas - memoizado com useCallback
   const getGridColumns = useCallback(() => {
@@ -271,6 +337,17 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
       playSyllable(currentWord.word);
     }
   }, [currentWord]);
+
+  // Função para lidar com o término do feedback positivo
+  const handlePositiveFeedbackComplete = useCallback(() => {
+    // Após o feedback positivo, automaticamente vai para a próxima palavra
+    resetGame();
+  }, [resetGame]);
+
+  // Função para lidar com o término do feedback negativo
+  const handleNegativeFeedbackComplete = useCallback(() => {
+    setShowError(false);
+  }, []);
 
   // Se não houver palavra atual, exiba uma mensagem com botão para tentar novamente
   if (!currentWord) {
@@ -327,58 +404,54 @@ const CompleteWord: React.FC<CompleteWordProps> = memo(({ onShowProgress }) => {
           {/* Palavra a ser completada */}
           <div className="text-center mb-4">
             <h2 className="font-fredoka text-xl text-gray-700">Complete a palavra:</h2>
-            <div className={`mt-2 grid gap-2 ${getGridColumns()}`}>
-              {dropZones.map((zone, index) => (
-                <DropZone
-                  key={zone.id}
-                  accept="syllable"
-                  isActive={!!zone.text}
-                  index={index}
-                  onDrop={(item) => handleDrop(zone.id, item)}
-                >
-                  {zone.text || '_'}
-                </DropZone>
-              ))}
-            </div>
-          </div>
+            <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+              <div className={`mt-2 grid gap-2 ${getGridColumns()}`}>
+                {dropZones.map((zone, index) => (
+                  <DropZone
+                    key={zone.id}
+                    id={zone.id}
+                    isActive={!!zone.text}
+                    index={index}
+                  >
+                    {zone.text || '_'}
+                  </DropZone>
+                ))}
+              </div>
 
-          {/* Sílabas disponíveis */}
-          <div className="mt-auto">
-            <h3 className="font-fredoka text-lg text-gray-700 mb-2">Sílabas:</h3>
-            <div className="flex flex-wrap justify-center gap-2">
-              {dragItems.map(item => !item.used && (
-                <DragItem
-                  key={item.id}
-                  id={item.id}
-                  text={item.text}
-                  type="syllable"
-                  onClick={() => handleItemClick(item.text)}
-                />
-              ))}
-            </div>
+              {/* Sílabas disponíveis */}
+              <div className="mt-auto">
+                <h3 className="font-fredoka text-lg text-gray-700 mb-2">Sílabas:</h3>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {dragItems.map(item => !item.used && (
+                    <DragItem
+                      key={item.id}
+                      id={item.id}
+                      text={item.text}
+                      onClick={() => handleItemClick(item.text)}
+                      isDisabled={item.used}
+                    />
+                  ))}
+                </div>
+              </div>
+            </DndContext>
           </div>
-
-          {/* Botão para próxima palavra */}
-          {isCompleted && (
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.3 }}
-              className="btn mt-4 px-8 py-2"
-              onClick={resetGame}
-            >
-              Próxima Palavra
-            </motion.button>
-          )}
         </div>
       </div>
 
       {/* Feedback de sucesso */}
       {showSuccess && (
-        <PositiveFeedback onComplete={() => {
-          // Opcional: ação adicional após mostrar o feedback
-          console.log('Feedback de sucesso concluído');
-        }} />
+        <PositiveFeedback 
+          onComplete={handlePositiveFeedbackComplete}
+          text={`Muito bem! Você completou "${currentWord?.word}" corretamente!`}
+        />
+      )}
+
+      {/* Feedback de erro */}
+      {showError && (
+        <NegativeFeedback 
+          onComplete={handleNegativeFeedbackComplete}
+          text="Ops! Tente organizar as sílabas de forma diferente."
+        />
       )}
 
       {/* Popup de recompensa */}

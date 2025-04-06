@@ -121,7 +121,7 @@ export const wordsList: WordData[] = [
     id: "word12",
     word: "SAPO",
     syllables: ["SA", "PO"],
-    imageUrl: "https://images.pexels.com/photos/76957/tree-frog-frog-green-amphibian-76957.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "https://images.pexels.com/photos/674318/pexels-photo-674318.jpeg?auto=compress&cs=tinysrgb&w=600",
     distractors: ["PE", "LO"],
     level: 1
   },
@@ -129,7 +129,7 @@ export const wordsList: WordData[] = [
     id: "word13",
     word: "MACACO",
     syllables: ["MA", "CA", "CO"],
-    imageUrl: "https://images.pexels.com/photos/1319515/pexels-photo-1319515.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "https://images.pexels.com/photos/1137084/pexels-photo-1137084.jpeg?auto=compress&cs=tinysrgb&w=600",
     distractors: ["BI", "CHO"],
     level: 1
   },
@@ -137,7 +137,7 @@ export const wordsList: WordData[] = [
     id: "word14",
     word: "LEITE",
     syllables: ["LEI", "TE"],
-    imageUrl: "https://images.pexels.com/photos/2064129/pexels-photo-2064129.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "https://images.pexels.com/photos/248412/pexels-photo-248412.jpeg?auto=compress&cs=tinysrgb&w=600",
     distractors: ["QUE", "JO"],
     level: 1
   },
@@ -153,7 +153,7 @@ export const wordsList: WordData[] = [
     id: "word16",
     word: "PICOLÉ",
     syllables: ["PI", "CO", "LÉ"],
-    imageUrl: "https://images.pexels.com/photos/1375807/pexels-photo-1375807.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "https://images.pexels.com/photos/1028715/pexels-photo-1028715.jpeg?auto=compress&cs=tinysrgb&w=600",
     distractors: ["SO", "VE", "TE"],
     level: 1
   },
@@ -203,7 +203,7 @@ export const wordsList: WordData[] = [
     id: "word19",
     word: "CARROSSEL",
     syllables: ["CAR", "ROS", "SEL"],
-    imageUrl: "https://images.pexels.com/photos/2399097/pexels-photo-2399097.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "https://images.pexels.com/photos/69230/pexels-photo-69230.jpeg?auto=compress&cs=tinysrgb&w=600",
     distractors: ["PAR", "QUE", "DI", "VER", "SÃO"],
     level: 2
   },
@@ -253,7 +253,7 @@ export const wordsList: WordData[] = [
     id: "word10",
     word: "DINOSSAURO",
     syllables: ["DI", "NOS", "SAU", "RO"],
-    imageUrl: "https://images.pexels.com/photos/67112/pexels-photo-67112.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "https://images.pexels.com/photos/53974/pexels-photo-53974.jpeg?auto=compress&cs=tinysrgb&w=600",
     distractors: ["A", "NI", "MAL", "PRÉ", "HIS", "TÓ", "RI", "CO"],
     level: 3
   },
@@ -261,7 +261,7 @@ export const wordsList: WordData[] = [
     id: "word23",
     word: "HELICÓPTERO",
     syllables: ["HE", "LI", "CÓP", "TE", "RO"],
-    imageUrl: "https://images.pexels.com/photos/87945/helicopter-transport-helicopter-military-87945.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "https://images.pexels.com/photos/12569903/pexels-photo-12569903.jpeg?auto=compress&cs=tinysrgb&w=600",
     distractors: ["A", "VI", "ÃO", "VO", "AR", "PI", "LO", "TO"],
     level: 3
   },
@@ -277,7 +277,7 @@ export const wordsList: WordData[] = [
     id: "word25",
     word: "BORBOLETA",
     syllables: ["BOR", "BO", "LE", "TA"],
-    imageUrl: "https://images.pexels.com/photos/36485/blossom-bloom-butterfly-yellow.jpg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "https://images.pexels.com/photos/1488507/pexels-photo-1488507.jpeg?auto=compress&cs=tinysrgb&w=600",
     distractors: ["IN", "SE", "TO", "VO", "AR", "CO", "LO", "RI", "DO"],
     level: 3
   },
@@ -285,7 +285,7 @@ export const wordsList: WordData[] = [
     id: "word26",
     word: "ESPANTALHO",
     syllables: ["ES", "PAN", "TA", "LHO"],
-    imageUrl: "https://images.pexels.com/photos/8961667/pexels-photo-8961667.jpeg?auto=compress&cs=tinysrgb&w=600",
+    imageUrl: "https://images.pexels.com/photos/14815069/pexels-photo-14815069.jpeg?auto=compress&cs=tinysrgb&w=600",
     distractors: ["FA", "ZEN", "DA", "PÁS", "SA", "RO", "MI", "LHO"],
     level: 3
   },
@@ -338,33 +338,46 @@ export const getLevelDetails = (levelId: number): LevelData | undefined => {
   return levels.find(level => level.id === levelId);
 };
 
-// Função para criar um array de sílabas para o jogo, incluindo distrações
-export const getSyllablesForWord = (wordData: WordData, includeDistractors: boolean = true): {id: string, text: string, used: boolean}[] => {
-  // Começa com as sílabas corretas
-  const syllables = wordData.syllables.map((text, index) => ({
-    id: `correct_${index}`,
-    text,
+/**
+ * Função para embaralhar um array usando o algoritmo Fisher-Yates
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
+// Função para obter sílabas a partir de uma palavra
+export function getSyllablesForWord(word: WordData, shuffle: boolean = false): { id: string; text: string; used: boolean }[] {
+  let syllables = [...word.syllables];
+  
+  // Adicionar sílabas distrativas (distractors)
+  if (word.distractors && word.distractors.length > 0) {
+    syllables = [...syllables, ...word.distractors];
+  }
+
+  // Transformar em objetos
+  let result = syllables.map((syllable, index) => ({
+    id: `syllable-${word.id}-${index}`,
+    text: syllable,
     used: false
   }));
-  
-  // Adiciona distrações se solicitado e se existirem
-  if (includeDistractors && wordData.distractors && wordData.distractors.length > 0) {
-    const distractors = wordData.distractors.map((text, index) => ({
-      id: `distractor_${index}`,
-      text,
-      used: false
-    }));
-    
-    return [...syllables, ...distractors].sort(() => Math.random() - 0.5); // Embaralha as sílabas
-  }
-  
-  return syllables.sort(() => Math.random() - 0.5); // Embaralha as sílabas
-};
 
-// Função para criar as zonas de soltar para uma palavra
-export const getDropZonesForWord = (wordData: WordData): {id: string, text: string | null}[] => {
-  return wordData.syllables.map((_, index) => ({
-    id: `drop_${index}`,
-    text: null // Inicialmente vazio
+  // Embaralhar se necessário
+  if (shuffle) {
+    result = shuffleArray(result);
+  }
+
+  return result;
+}
+
+// Função para obter zonas de soltar para uma palavra
+export function getDropZonesForWord(word: WordData): { id: string; text: string | null }[] {
+  return word.syllables.map((_, index) => ({
+    id: `dropzone-${word.id}-${index}`,
+    text: null
   }));
-}; 
+} 

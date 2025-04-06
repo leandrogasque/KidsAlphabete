@@ -5,14 +5,20 @@ import AudioButton from './AudioButton';
 interface PositiveFeedbackProps {
   text?: string;
   onComplete?: () => void;
+  duration?: number; // Nova prop para controlar a duração
 }
 
 /**
  * Componente que exibe uma animação e som de feedback positivo
  * @param text - Texto personalizado para o feedback
  * @param onComplete - Função chamada quando a animação terminar
+ * @param duration - Duração do feedback em ms (padrão: 2000ms)
  */
-const PositiveFeedback = ({ text = "Muito bem! Você completou a palavra corretamente!", onComplete }: PositiveFeedbackProps) => {
+const PositiveFeedback = ({ 
+  text = "Muito bem! Você completou a palavra corretamente!", 
+  onComplete,
+  duration = 2000 // Reduzido de 4000ms para 2000ms
+}: PositiveFeedbackProps) => {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -23,10 +29,10 @@ const PositiveFeedback = ({ text = "Muito bem! Você completou a palavra correta
           onComplete();
         }, 300); // Um pequeno atraso após a animação de saída
       }
-    }, 4000); // Tempo suficiente para a animação e o som
+    }, duration);
     
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, [onComplete, duration]);
 
   // Variantes para a animação de confete
   const confettiVariants = {
@@ -35,16 +41,16 @@ const PositiveFeedback = ({ text = "Muito bem! Você completou a palavra correta
       opacity: 1,
       y: 0,
       transition: {
-        delay: i * 0.1,
-        duration: 0.5,
+        delay: i * 0.05, // Mais rápido, era 0.1
+        duration: 0.3, // Mais rápido, era 0.5
       },
     }),
     exit: (i: number) => ({
       opacity: 0,
       y: 100,
       transition: {
-        delay: i * 0.05,
-        duration: 0.3,
+        delay: i * 0.03, // Mais rápido, era 0.05
+        duration: 0.2, // Mais rápido, era 0.3
       },
     }),
   };
@@ -79,12 +85,12 @@ const PositiveFeedback = ({ text = "Muito bem! Você completou a palavra correta
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.5, opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }} // Mais rápido, era 0.5
             className="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-md"
           >
             <motion.div
               animate={{ rotate: [0, 10, -10, 10, 0] }}
-              transition={{ duration: 1, repeat: 2 }}
+              transition={{ duration: 0.8, repeat: 1 }} // Mais rápido, era 1s e repetia 2 vezes
             >
               <span className="text-6xl mb-4 inline-block">⭐</span>
             </motion.div>
