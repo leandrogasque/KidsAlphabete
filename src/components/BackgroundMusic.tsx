@@ -1,3 +1,4 @@
+/*
 import React, { useState, useEffect } from 'react';
 import { useGameContext } from '../contexts/GameContext';
 
@@ -108,4 +109,5 @@ const BackgroundMusic: React.FC = () => {
   );
 };
 
-export default BackgroundMusic; 
+export default BackgroundMusic;
+*/ 

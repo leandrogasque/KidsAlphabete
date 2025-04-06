@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameContext } from '../contexts/GameContext';
 
@@ -17,129 +17,101 @@ const AudioControls: React.FC<AudioControlsProps> = ({ position = 'top-right' })
     'top-left': 'top-4 left-4',
   };
   
+  // Simplesmente alterna a configuração de música de fundo
   const handleToggleMusic = () => {
-    const newMusicState = !settings.backgroundMusic;
-    console.log('AudioControls: Alternando música para', newMusicState);
-    
-    // Obter o elemento de áudio criado pelo BackgroundMusic
-    const audioElement = document.getElementById('background-music') as HTMLAudioElement;
-    
-    if (newMusicState && audioElement) {
-      try {
-        console.log('AudioControls: Tentando iniciar música diretamente');
-        // Tentar reproduzir
-        const playPromise = audioElement.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.error('AudioControls: Erro ao reproduzir música:', error);
-          });
-        }
-      } catch (error) {
-        console.error('AudioControls: Erro ao iniciar música:', error);
-      }
-    } else if (audioElement) {
-      audioElement.pause();
-    }
-    
-    // Atualizar configuração
-    updateSettings({ backgroundMusic: newMusicState });
+    updateSettings({ backgroundMusic: !settings.backgroundMusic });
   };
   
+  // Alterna a configuração de efeitos sonoros
   const handleToggleSoundEffects = () => {
-    console.log('AudioControls: Alternando efeitos sonoros', { atual: settings.soundEffects });
     updateSettings({ soundEffects: !settings.soundEffects });
   };
-
-  // Ícones para os botões
-  const getMusicIcon = () => {
-    if (settings.backgroundMusic) {
-      return (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M12 9.5l-3-3m0 0l-3-3m3 3H9.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.5 5.5 0 010 7.424" />
-        </svg>
-      );
-    } else {
-      return (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15.414a8 8 0 1112.828 0M12 6v6m0 0l-3-3m3 3l3-3" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072" />
-        </svg>
-      );
-    }
-  };
   
+  // Alterna o menu de áudio
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
-    <div className={`fixed ${positionClasses[position]} z-20`}>
-      <motion.div 
-        className="relative"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        {/* Botão principal */}
-        <motion.button 
-          onClick={() => setIsOpen(!isOpen)}
-          className={`bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-shadow text-xl ${settings.backgroundMusic ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          title={settings.backgroundMusic ? "Música ligada - Clique para configurações" : "Música desligada - Clique para configurações"}
-          animate={settings.backgroundMusic ? { 
-            rotate: [0, 5, -5, 0],
-            scale: [1, 1.05, 1]
-          } : {}}
-          transition={settings.backgroundMusic ? { 
-            repeat: Infinity, 
-            repeatDelay: 2, 
-            duration: 0.8 
-          } : {}}
+    <div className={`fixed ${positionClasses[position]} z-50`}>
+      {isOpen ? (
+        <motion.div 
+          className="bg-white rounded-lg shadow-lg p-3 min-w-[200px]"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
         >
-          {settings.backgroundMusic ? '🎵' : '🔇'}
-        </motion.button>
-        
-        {/* Painel de controles */}
-        {isOpen && (
-          <motion.div 
-            className="absolute bottom-full right-0 mb-2 bg-white p-4 rounded-lg shadow-lg min-w-[200px]"
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-          >
-            <div className="flex flex-col space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-md font-medium flex items-center">
-                  <span className="mr-2 text-lg">🎵</span> Música
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-bold text-gray-700">Configurações de Áudio</h3>
+            <button 
+              onClick={toggleMenu}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="space-y-3">
+            <div 
+              className="flex justify-between items-center p-2 rounded hover:bg-gray-50 cursor-pointer"
+              onClick={handleToggleMusic}
+            >
+              <span className="flex items-center">
+                <span className={`mr-2 text-xl ${settings.backgroundMusic ? 'text-primary' : 'text-gray-400'}`}>
+                  🎵
                 </span>
-                <button 
-                  onClick={handleToggleMusic}
-                  className={`w-14 h-7 rounded-full relative ${settings.backgroundMusic ? 'bg-primary' : 'bg-gray-300'} transition-colors duration-300`}
-                >
-                  <motion.span 
-                    className="absolute top-1 left-1 bg-white w-5 h-5 rounded-full shadow-md"
-                    animate={{ x: settings.backgroundMusic ? 28 : 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                  />
-                </button>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-md font-medium flex items-center">
-                  <span className="mr-2 text-lg">🔊</span> Efeitos
-                </span>
-                <button 
-                  onClick={handleToggleSoundEffects}
-                  className={`w-14 h-7 rounded-full relative ${settings.soundEffects ? 'bg-primary' : 'bg-gray-300'} transition-colors duration-300`}
-                >
-                  <motion.span 
-                    className="absolute top-1 left-1 bg-white w-5 h-5 rounded-full shadow-md"
-                    animate={{ x: settings.soundEffects ? 28 : 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                  />
-                </button>
+                <span>Música de Fundo</span>
+              </span>
+              <div className={`w-10 h-6 rounded-full p-1 ${settings.backgroundMusic ? 'bg-primary' : 'bg-gray-300'}`}>
+                <div 
+                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                    settings.backgroundMusic ? 'translate-x-4' : ''
+                  }`} 
+                />
               </div>
             </div>
-          </motion.div>
-        )}
-      </motion.div>
+            
+            <div 
+              className="flex justify-between items-center p-2 rounded hover:bg-gray-50 cursor-pointer"
+              onClick={handleToggleSoundEffects}
+            >
+              <span className="flex items-center">
+                <span className={`mr-2 text-xl ${settings.soundEffects ? 'text-primary' : 'text-gray-400'}`}>
+                  🔊
+                </span>
+                <span>Efeitos Sonoros</span>
+              </span>
+              <div className={`w-10 h-6 rounded-full p-1 ${settings.soundEffects ? 'bg-primary' : 'bg-gray-300'}`}>
+                <div 
+                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                    settings.soundEffects ? 'translate-x-4' : ''
+                  }`} 
+                />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      ) : (
+        <motion.button
+          onClick={toggleMenu}
+          className={`rounded-full p-3 shadow-lg ${
+            settings.backgroundMusic ? 'bg-primary text-white' : 'bg-white text-gray-600'
+          }`}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          animate={settings.backgroundMusic ? {
+            rotate: [0, 5, -5, 5, 0],
+            scale: [1, 1.05, 1, 1.05, 1],
+          } : {}}
+          transition={settings.backgroundMusic ? { 
+            duration: 1.5, 
+            repeat: Infinity, 
+            repeatDelay: 3 
+          } : {}}
+          title={settings.backgroundMusic ? "Som está ativado" : "Som está desativado"}
+        >
+          {settings.backgroundMusic ? '🔊' : '🔇'}
+        </motion.button>
+      )}
     </div>
   );
 };

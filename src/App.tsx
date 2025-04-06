@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import { GameProvider, useGameContext } from './contexts/GameContext'
 import { levels, gameModes } from './utils/gameData'
 import { DndContext } from '@dnd-kit/core'
+import SimpleAudioPlayer from './components/SimpleAudioPlayer'
+import AudioControls from './components/AudioControls'
 
 // Versão simplificada para evitar problemas com lazy loading
 import CompleteWord from './pages/CompleteWord'
@@ -258,6 +260,8 @@ const App = React.memo(() => {
   return (
     <DndContext>
       <GameProvider>
+        <SimpleAudioPlayer />
+        <AudioControls />
         <AppContent />
       </GameProvider>
     </DndContext>

@@ -531,10 +531,24 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
   // Função para atualizar configurações
   const updateSettings = (newSettings: Partial<GameSettings>) => {
-    setSettings(prev => ({
-      ...prev,
+    console.log('GameContext: Atualizando configurações:', newSettings);
+    
+    // Criar cópia das configurações atuais
+    const updatedSettings = {
+      ...settings,
       ...newSettings
-    }));
+    };
+    
+    // Atualizar as configurações
+    setSettings(updatedSettings);
+    
+    // Salvar as configurações no localStorage imediatamente
+    try {
+      localStorage.setItem('gameSettings', JSON.stringify(updatedSettings));
+      console.log('GameContext: Configurações salvas com sucesso');
+    } catch (error) {
+      console.error('GameContext: Erro ao salvar configurações', error);
+    }
   };
 
   // Função para habilitar/desabilitar uma palavra
